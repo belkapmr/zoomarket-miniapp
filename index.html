@@ -1380,16 +1380,22 @@ function updatePreview() {
   const groomChecked = Boolean(document.getElementById('isGrooming')?.checked);
   const groomMark = groomChecked ? ' [✂️ ГРУМИНГ]' : '';
   const slotsLine = groomChecked
-    ? `\nСлоты: ${getGroomDates({ grooming_dates: parseSlotList(v('groomDates'), []) }).join(', ')} | ${getGroomTimes({ grooming_times: parseSlotList(v('groomTimes'), []) }).join(', ')}`
+    ? `
+Слоты: ${getGroomDates({ grooming_dates: parseSlotList(v('groomDates'), []) }).join(', ')} | ${getGroomTimes({ grooming_times: parseSlotList(v('groomTimes'), []) }).join(', ')}`
     : '';
 
   document.getElementById('preview').textContent =
-    `${v('kind')}${shopMark}${groomMark}: ${v('title') || 'Название объявления'}\n` +
-    `Категория: ${v('category')}\n` +
-    `Город: ${v('city') || 'не указан'}\n` +
+    `${v('kind')}${shopMark}${groomMark}: ${v('title') || 'Название объявления'}
+` +
+    `Категория: ${v('category')}
+` +
+    `Город: ${v('city') || 'не указан'}
+` +
     `Цена: ${v('price') ? v('price') + ' ' + v('currency') : v('currency')}` +
-    `${slotsLine}\n` +
-    `${v('description') || 'Описание'}\n` +
+    `${slotsLine}
+` +
+    `${v('description') || 'Описание'}
+` +
     `Связь: ${v('contact')} ${v('phone')}`;
 }
 
