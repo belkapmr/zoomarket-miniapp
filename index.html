@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ЗооМаркет</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#08111f;--panel:#132238;--panel2:#1b304a;--line:#223b5a;--muted:#9aacc0;--yellow:#ffc900;--green:#36d98a;--purple:#6d52bb;--white:#f4f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:88px}
+header{padding:18px 18px 10px;position:sticky;top:0;background:rgba(8,17,31,.96);z-index:5;border-bottom:1px solid #172b43}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:15px;background:var(--yellow);display:grid;place-items:center;font-size:27px}.brand h1{font-size:21px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
+main{padding:16px}.tabs{display:flex;gap:8px;overflow:auto;margin:8px 0 16px}.chip{border:1px solid var(--line);background:var(--panel);color:#bdc9d8;padding:10px 15px;border-radius:24px;white-space:nowrap;font-weight:600}.chip.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
+.searchbox,.card,.field,.preview{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:15px;margin-bottom:13px}.searchbox input{background:none;border:0;color:white;font-size:16px;width:100%;outline:0}.sectiontitle{font-size:13px;color:var(--muted);font-weight:800;letter-spacing:1px;margin:22px 0 12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center}.category .emoji{font-size:30px}.category b{display:block;margin-top:7px}.listing{display:flex;gap:12px}.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px}.listing h3{font-size:16px;margin:2px 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.price{color:var(--yellow);font-weight:800;margin-top:8px}.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px}
+button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:var(--yellow);color:#111;width:100%}.secondary{background:var(--panel2);color:white;border:1px solid var(--line)}.purple{background:#302650;color:#d5c8ff;border:1px solid #4b3b79}
+.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}.field input,.field textarea,.field select{width:100%;background:transparent;border:0;outline:0;color:white;font:16px inherit}.field textarea{min-height:90px;resize:vertical}.field select option{background:var(--panel)}
+.row{display:flex;gap:10px}.row>*{flex:1}.bottom{position:fixed;bottom:0;left:0;right:0;background:#0b1728;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:10}.nav{background:none;color:var(--muted);padding:5px 4px;font-size:11px;flex:1}.nav span{display:block;font-size:23px;margin-bottom:3px}.nav.active{color:var(--yellow)}
+.hidden{display:none!important}.empty{text-align:center;padding:45px 15px;color:var(--muted)}.empty strong{display:block;color:white;font-size:19px;margin:10px}.preview{border-style:dashed}.preview pre{white-space:pre-wrap;color:#c5d0de;font:14px/1.5 inherit;margin:8px 0}
+.photoadd{border:1px dashed #45617f;border-radius:15px;padding:18px;text-align:center;color:var(--muted)}.notice{font-size:12px;color:var(--muted);line-height:1.5;margin:10px 2px}
+</style></head>
+<body>
+<header><div class="brand"><div class="logo">🐾</div><div><h1>ЗооМаркет</h1><p>Животные · товары · услуги</p></div></div></header>
+<main>
+<section id="home">
+<div class="searchbox"><input id="search" placeholder="🔎 Найти животное, товар или услугу"></div>
+<div class="tabs"><button class="chip active" data-filter="Все">Все</button><button class="chip" data-filter="Животные">Животные</button><button class="chip" data-filter="Товары">Товары</button><button class="chip" data-filter="Услуги">Услуги</button></div>
+<div class="sectiontitle">КАТЕГОРИИ</div>
+<div class="grid">
+<div class="category" data-cat="Животные"><div class="emoji">🐶</div><b>Животные</b></div>
+<div class="category" data-cat="Товары"><div class="emoji">🛍️</div><b>Зоотовары</b></div>
+<div class="category" data-cat="Услуги"><div class="emoji">🩺</div><b>Ветуслуги</b></div>
+<div class="category" data-cat="Услуги"><div class="emoji">✂️</div><b>Груминг</b></div>
+</div>
+<div class="sectiontitle">ПОСЛЕДНИЕ ОБЪЯВЛЕНИЯ</div><div id="listings"></div>
+</section>
+<section id="create" class="hidden">
+<h2>Разместить объявление</h2><p class="muted">Заполните информацию — объявление отправится на проверку.</p>
+<div class="field"><label>Что размещаем?</label><select id="kind"><option>Животное</option><option>Зоотовар</option><option>Услуга</option><option>Отдам даром</option><option>Ищу</option></select></div>
+<div class="field"><label>Название объявления</label><input id="title" placeholder="Например: Щенки корги"></div>
+<div class="field"><label>Категория</label><select id="category"><option>Животные</option><option>Товары</option><option>Услуги</option></select></div>
+<div class="row"><div class="field"><label>Цена</label><input id="price" placeholder="Например: 500"></div><div class="field"><label>Валюта</label><select id="currency"><option>руб.</option><option>лей</option><option>€</option><option>$</option><option>Бесплатно</option></select></div></div>
+<div class="field"><label>Город</label><input id="city" placeholder="Тирасполь, Кишинёв..."></div>
+<div class="field"><label>Описание</label><textarea id="description" placeholder="Расскажите подробнее..."></textarea></div>
+<div class="field"><label>Контактный телефон</label><input id="phone" placeholder="+373..."></div>
+<div class="field"><label>Как связаться?</label><select id="contact"><option>Telegram</option><option>Viber</option><option>WhatsApp</option><option>Телефон</option></select></div>
+<div class="photoadd">📷 Добавить фотографии (до 6)<input id="photos" type="file" accept="image/*" multiple style="display:block;margin:12px auto 0;max-width:100%"></div>
+<div class="sectiontitle">ПРЕДПРОСМОТР</div><div class="preview" id="preview">Заполните название и описание — здесь появится ваш текст.</div>
+<button class="primary" id="publish">📣 Отправить на модерацию</button><p class="notice">Демонстрационная версия: для реальной публикации, хранения фотографий и модерации нужно подключить сервер и базу данных.</p>
+</section>
+<section id="my" class="hidden"><h2>Мои объявления</h2><div id="mylist" class="empty">Пока нет объявлений.<strong>Создайте первое!</strong></div></section>
+<section id="saved" class="hidden"><h2>Избранное</h2><div class="empty">❤️ Здесь будут сохранённые объявления.</div></section>
+<section id="profile" class="hidden"><h2>Профиль</h2><div class="card"><b id="username">Пользователь Telegram</b><p class="muted">Ваши контакты и объявления будут доступны здесь.</p></div><div class="card">🛡️ Объявления проходят модерацию перед публикацией.</div></section>
+</main>
+<nav class="bottom">
+<button class="nav active" data-page="home"><span>🔎</span>Поиск</button>
+<button class="nav" data-page="create"><span>📣</span>Разместить</button>
+<button class="nav" data-page="my"><span>📋</span>Мои</button>
+<button class="nav" data-page="saved"><span>❤️</span>Избранное</button>
+<button class="nav" data-page="profile"><span>👤</span>Профиль</button>
+</nav>
+<script>
+const tg=window.Telegram?.WebApp; if(tg){tg.ready();tg.expand();try{tg.setHeaderColor('#08111f');tg.setBackgroundColor('#08111f')}catch(e){}}
+const demo=[
+{title:'Шотландский котёнок',cat:'Животные',desc:'Ласковый, приучен к лотку. Подробности у владельца.',city:'Тирасполь',price:'800 руб.',emoji:'🐱'},
+{title:'Переноска для животных',cat:'Товары',desc:'Новая переноска для кошек и небольших собак.',city:'Бендеры',price:'250 руб.',emoji:'🧺'},
+{title:'Ветеринар на дом',cat:'Услуги',desc:'Консультация и осмотр домашних животных.',city:'Тирасполь',price:'Договорная',emoji:'🩺'}
+];
+let current='Все', userAds=[];
+function render(items=demo){document.getElementById('listings').innerHTML=items.map(x=>`<div class="card listing"><div class="photo">${x.emoji||'🐾'}</div><div><span class="tag">${x.cat}</span><h3>${esc(x.title)}</h3><div class="muted">${esc(x.city||'Город не указан')} · ${esc(x.desc||'')}</div><div class="price">${esc(x.price||'Цена договорная')}</div></div></div>`).join('')||'<div class="empty">Ничего не найдено</div>'}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function page(p){document.querySelectorAll('main>section').forEach(s=>s.classList.toggle('hidden',s.id!==p));document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.page===p));if(p==='my')showMy()}
+document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>page(b.dataset.page));
+document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{current=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));render(current==='Все'?demo:demo.filter(x=>x.cat===current))});
+document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{page('home');current=b.dataset.cat;render(demo.filter(x=>x.cat===current))});
+document.getElementById('search').oninput=e=>{let q=e.target.value.toLowerCase();render(demo.filter(x=>(current==='Все'||x.cat===current)&&(`${x.title} ${x.desc} ${x.city}`).toLowerCase().includes(q)))};
+['title','kind','category','price','currency','city','description','phone','contact'].forEach(id=>document.getElementById(id).addEventListener('input',updatePreview));
+function updatePreview(){let v=id=>document.getElementById(id).value;document.getElementById('preview').textContent=`${v('kind')}: ${v('title')||'Название объявления'}\nКатегория: ${v('category')}\nГород: ${v('city')||'не указан'}\nЦена: ${v('price')?v('price')+' '+v('currency'):v('currency')}\n${v('description')||'Описание'}\nСвязь: ${v('contact')} ${v('phone')}`;}
+document.getElementById('publish').onclick=()=>{let title=document.getElementById('title').value.trim();if(!title){alert('Введите название объявления');return}let ad={title,cat:document.getElementById('category').value,desc:document.getElementById('description').value,city:document.getElementById('city').value,price:(document.getElementById('price').value||'')+' '+document.getElementById('currency').value,emoji:'🐾',status:'Ожидает модерации'};userAds.unshift(ad);alert('Черновик создан. Для реальной отправки на модерацию нужно подключить сервер.');page('my')};
+function showMy(){let el=document.getElementById('mylist');el.className=userAds.length?'':'empty';el.innerHTML=userAds.length?userAds.map(a=>`<div class="card"><b>${esc(a.title)}</b><p class="muted">${esc(a.city)} · ${esc(a.status)}</p></div>`).join(''):'Пока нет объявлений.<strong>Создайте первое!</strong>'}
+const u=tg?.initDataUnsafe?.user;if(u){document.getElementById('username').textContent=[u.first_name,u.last_name].filter(Boolean).join(' ')||'Пользователь Telegram'}
+render();
+</script></body></html>
