@@ -6,7 +6,7 @@ from typing import Optional
 from urllib.parse import parse_qsl
 
 import firebase_admin
-from fastapi import FastAPI, Header, HTTPException, Query
+from fastapi import Body, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from firebase_admin import credentials, firestore
 from pydantic import BaseModel
@@ -72,6 +72,18 @@ class AdCreate(BaseModel):
     contact: str = "Telegram"
 
 
+class AdUpdate(BaseModel):
+    kind: Optional[str] = None
+    title: Optional[str] = None
+    category: Optional[str] = None
+    price: Optional[str] = None
+    currency: Optional[str] = None
+    city: Optional[str] = None
+    description: Optional[str] = None
+    phone: Optional[str] = None
+    contact: Optional[str] = None
+
+
 @app.get("/")
 def root():
     return {"status": "ok", "service": "ZooMarket API"}
@@ -124,7 +136,55 @@ def create_ad(ad: AdCreate, x_telegram_init_data: str = Header(default="")):
     }
 
     _, ref = db.collection("ads").add(doc_data)
-    return {"id": ref.id, "status": "pending"}
+    return {"id": ref.id, "status": "approved", "item": doc_data | {"id": ref.id}}
+
+
+@app.patch("/api/ads/{ad_id}")
+def update_ad(
+    ad_id: str,
+    payload: AdUpdate = Body(...),
+    x_telegram_init_data: str = Header(default=""),
+):
+    tg_user = verify_telegram_init_data(x_telegram_init_data, BOT_TOKEN)
+    user_id = tg_user.get("id")
+
+    doc_ref = db.collection("ads").document(ad_id)
+    snap = doc_ref.get()
+    if not snap.exists:
+        raise HTTPException(status_code=404, detail="Ad not found")
+
+    data = snap.to_dict() or {}
+    if str(data.get("author_id", "")) != str(user_id):
+        raise HTTPException(status_code=403, detail="Forbidden: not the author")
+
+    updates = {}
+    if payload.kind is not None:
+        updates["kind"] = payload.kind
+    if payload.title is not None:
+        clean_title = payload.title.strip()
+        if not clean_title:
+            raise HTTPException(status_code=400, detail="Title is required")
+        updates["title"] = clean_title
+    if payload.category is not None:
+        updates["category"] = payload.category
+    if payload.city is not None:
+        updates["city"] = payload.city.strip()
+    if payload.description is not None:
+        updates["description"] = payload.description.strip()
+    if payload.phone is not None:
+        updates["phone"] = payload.phone.strip()
+    if payload.contact is not None:
+        updates["contact"] = payload.contact
+    if payload.price is not None:
+        p = payload.price.strip()
+        curr = (payload.currency or data.get("currency") or "").strip()
+        updates["price"] = f"{p} {curr}".strip() if p and curr and curr not in p else (p or curr)
+
+    if updates:
+        doc_ref.update(updates)
+
+    updated = doc_ref.get().to_dict() or {}
+    return {"id": ad_id, "item": updated | {"id": ad_id}}
 
 
 @app.get("/api/my-ads")
