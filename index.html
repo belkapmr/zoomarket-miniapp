@@ -11,8 +11,8 @@ header{padding:18px 18px 10px;position:sticky;top:0;background:rgba(8,17,31,.96)
 .brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:15px;background:var(--yellow);display:grid;place-items:center;font-size:27px}.brand h1{font-size:21px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
 main{padding:16px}.tabs{display:flex;gap:8px;overflow:auto;margin:8px 0 16px}.chip{border:1px solid var(--line);background:var(--panel);color:#bdc9d8;padding:10px 15px;border-radius:24px;white-space:nowrap;font-weight:600}.chip.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
 .searchbox,.card,.field,.preview{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:15px;margin-bottom:13px}.searchbox input{background:none;border:0;color:white;font-size:16px;width:100%;outline:0}.sectiontitle{font-size:13px;color:var(--muted);font-weight:800;letter-spacing:1px;margin:22px 0 12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center;cursor:pointer}.category .emoji{font-size:30px}.category b{display:block;margin-top:7px}.listing{display:flex;gap:12px;cursor:pointer;transition:transform .12s ease,border-color .12s ease}.listing:active{transform:scale(.99);border-color:var(--yellow)}.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover;display:block}.listing>div:last-child{min-width:0;flex:1}.listing h3{font-size:16px;margin:2px 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.price{color:var(--yellow);font-weight:800;margin-top:8px}.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px}
-button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:var(--yellow);color:#111;width:100%}.secondary{background:var(--panel2);color:white;border:1px solid var(--line)}.danger-btn{background:#3a171c;color:#ff9ea2;border:1px solid #6b252e}.small-btn{padding:9px 12px;font-size:13px;border-radius:12px}.my-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center;cursor:pointer}.category .emoji{font-size:30px}.category b{display:block;margin-top:7px}.listing{display:flex;gap:12px;cursor:pointer;transition:transform .12s ease,border-color .12s ease}.listing:active,.my-card:active{transform:scale(.99);border-color:var(--yellow)}.my-card{cursor:pointer;transition:transform .12s ease,border-color .12s ease}.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover;display:block}.listing>div:last-child{min-width:0;flex:1}.listing h3{font-size:16px;margin:2px 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.price{color:var(--yellow);font-weight:800;margin-top:8px}.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px}
+button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:var(--yellow);color:#111;width:100%}.secondary{background:var(--panel2);color:white;border:1px solid var(--line)}.danger-btn{background:#3a171c;color:#ff9ea2;border:1px solid #6b252e}.small-btn{padding:10px 14px;font-size:13px;border-radius:12px}.my-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .field label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}.field input,.field textarea,.field select{width:100%;background:transparent;border:0;outline:0;color:white;font:16px inherit}.field textarea{min-height:90px;resize:vertical}.field select option{background:var(--panel)}
 .row{display:flex;gap:10px}.row>*{flex:1}.bottom{position:fixed;bottom:0;left:0;right:0;background:#0b1728;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:10}.nav{background:none;color:var(--muted);padding:5px 4px;font-size:11px;flex:1}.nav span{display:block;font-size:23px;margin-bottom:3px}.nav.active{color:var(--yellow)}
 .hidden{display:none!important}.empty{text-align:center;padding:45px 15px;color:var(--muted)}.empty strong{display:block;color:white;font-size:19px;margin:10px}.preview{border-style:dashed}.preview pre{white-space:pre-wrap;color:#c5d0de;font:14px/1.5 inherit;margin:8px 0}
@@ -25,7 +25,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 .modal-title{margin:6px 0 8px;font-size:20px}
 .modal-price{color:var(--yellow);font-size:18px;font-weight:800;margin-bottom:12px}
 .modal-line{margin-bottom:10px;line-height:1.5;font-size:15px}
-.modal-btns{display:flex;gap:10px;margin-top:16px}
+.modal-btns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 .modal-btns>*{flex:1}
 </style></head>
 <body>
@@ -49,7 +49,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <div class="field"><label>Название объявления</label><input id="title" placeholder="Например: Щенки корги"></div>
 <div class="field"><label>Категория</label><select id="category"><option>Животные</option><option>Товары</option><option>Услуги</option></select></div>
 <div class="row"><div class="field"><label>Цена</label><input id="price" placeholder="Например: 500"></div><div class="field"><label>Валюта</label><select id="currency"><option>руб.</option><option>лей</option><option>€</option><option>$</option><option>Бесплатно</option></select></div></div>
-<div class="field"><label>Город</label><input id="city" placeholder="Тирасполь, Кишинёв..."></div>
+<div class="field"><label>Город</label><input id="city" placeholder="Тирасполь, Бендеры..."></div>
 <div class="field"><label>Описание</label><textarea id="description" placeholder="Расскажите подробнее..."></textarea></div>
 <div class="field"><label>Контактный телефон</label><input id="phone" placeholder="+373..."></div>
 <div class="field"><label>Как связаться?</label><select id="contact"><option>Telegram</option><option>Viber</option><option>WhatsApp</option><option>Телефон</option></select></div>
@@ -74,6 +74,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
     <div class="modal-line" id="mContact"></div>
     <div class="modal-btns">
       <button class="secondary" id="mCopy">📋 Контакт</button>
+      <button class="secondary hidden" id="mEdit">✏️ Изменить</button>
       <button class="primary" onclick="closeAdModal()">Закрыть</button>
     </div>
   </div>
@@ -211,7 +212,7 @@ function renderThumbHtml(ad) {
   return `<div class="photo">${esc(ad.emoji || '🐾')}</div>`;
 }
 
-function openAdObj(ad) {
+function openAdObj(ad, myIdx = -1) {
   if (!ad) return;
   const cat = ad.cat || ad.category || 'Объявление';
   const kind = ad.kind ? ` · ${ad.kind}` : '';
@@ -232,6 +233,17 @@ function openAdObj(ad) {
   document.getElementById('mDesc').textContent = `📝 Описание: ${desc}`;
   document.getElementById('mContact').textContent = `📞 Связь: ${contactText}`;
 
+  const mEdit = document.getElementById('mEdit');
+  if (myIdx >= 0) {
+    mEdit.classList.remove('hidden');
+    mEdit.onclick = () => {
+      closeAdModal();
+      openEditModal(myIdx);
+    };
+  } else {
+    mEdit.classList.add('hidden');
+  }
+
   document.getElementById('mCopy').onclick = () => {
     const val = ad.phone || contactText;
     if (navigator.clipboard?.writeText) {
@@ -245,7 +257,11 @@ function openAdObj(ad) {
 }
 
 function openAdByIndex(idx) {
-  openAdObj(allAds[idx]);
+  openAdObj(allAds[idx], -1);
+}
+
+function openMyAdByIndex(idx) {
+  openAdObj(userAds[idx], idx);
 }
 
 function closeAdModal(e) {
@@ -504,10 +520,10 @@ function showMy() {
   const el = document.getElementById('mylist');
   el.className = userAds.length ? '' : 'empty';
   el.innerHTML = userAds.length
-    ? userAds.map((a, idx) => `<div class="card">
+    ? userAds.map((a, idx) => `<div class="card my-card" onclick="openMyAdByIndex(${idx})">
         <b>${esc(a.title)}</b>
         <p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.price || '')} · ${esc(a.status || 'approved')}</p>
-        <div class="my-actions">
+        <div class="my-actions" onclick="event.stopPropagation()">
           <button class="secondary small-btn" onclick="openEditModal(${idx})">✏️ Редактировать</button>
           <button class="danger-btn small-btn" onclick="deleteAd(${idx})">🗑 Удалить</button>
         </div>
