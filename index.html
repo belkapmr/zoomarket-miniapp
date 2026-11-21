@@ -11,16 +11,17 @@ header{padding:18px 18px 10px;position:sticky;top:0;background:rgba(8,17,31,.96)
 .brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:15px;background:var(--yellow);display:grid;place-items:center;font-size:27px}.brand h1{font-size:21px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
 main{padding:16px}.tabs{display:flex;gap:8px;overflow:auto;margin:8px 0 16px}.chip{border:1px solid var(--line);background:var(--panel);color:#bdc9d8;padding:10px 15px;border-radius:24px;white-space:nowrap;font-weight:600}.chip.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
 .searchbox,.card,.field,.preview{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:15px;margin-bottom:13px}.searchbox input{background:none;border:0;color:white;font-size:16px;width:100%;outline:0}.sectiontitle{font-size:13px;color:var(--muted);font-weight:800;letter-spacing:1px;margin:22px 0 12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center;cursor:pointer}.category .emoji{font-size:30px}.category b{display:block;margin-top:7px}.listing{display:flex;gap:12px;cursor:pointer;transition:transform .12s ease,border-color .12s ease}.listing:active{transform:scale(.99);border-color:var(--yellow)}.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px}.listing h3{font-size:16px;margin:2px 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.price{color:var(--yellow);font-weight:800;margin-top:8px}.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px}
-button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:var(--yellow);color:#111;width:100%}.secondary{background:var(--panel2);color:white;border:1px solid var(--line)}.purple{background:#302650;color:#d5c8ff;border:1px solid #4b3b79}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center;cursor:pointer}.category .emoji{font-size:30px}.category b{display:block;margin-top:7px}.listing{display:flex;gap:12px;cursor:pointer;transition:transform .12s ease,border-color .12s ease}.listing:active{transform:scale(.99);border-color:var(--yellow)}.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover;display:block}.listing h3{font-size:16px;margin:2px 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.price{color:var(--yellow);font-weight:800;margin-top:8px}.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px}
+button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:var(--yellow);color:#111;width:100%}.secondary{background:var(--panel2);color:white;border:1px solid var(--line)}.purple{background:#302650;color:#d5c8ff;border:1px solid #4b3b79}.small-btn{padding:9px 13px;font-size:13px;border-radius:12px;margin-top:10px}
 .field label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}.field input,.field textarea,.field select{width:100%;background:transparent;border:0;outline:0;color:white;font:16px inherit}.field textarea{min-height:90px;resize:vertical}.field select option{background:var(--panel)}
 .row{display:flex;gap:10px}.row>*{flex:1}.bottom{position:fixed;bottom:0;left:0;right:0;background:#0b1728;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:10}.nav{background:none;color:var(--muted);padding:5px 4px;font-size:11px;flex:1}.nav span{display:block;font-size:23px;margin-bottom:3px}.nav.active{color:var(--yellow)}
 .hidden{display:none!important}.empty{text-align:center;padding:45px 15px;color:var(--muted)}.empty strong{display:block;color:white;font-size:19px;margin:10px}.preview{border-style:dashed}.preview pre{white-space:pre-wrap;color:#c5d0de;font:14px/1.5 inherit;margin:8px 0}
-.photoadd{border:1px dashed #45617f;border-radius:15px;padding:18px;text-align:center;color:var(--muted)}.notice{font-size:12px;color:var(--muted);line-height:1.5;margin:10px 2px}
+.photoadd{border:1px dashed #45617f;border-radius:15px;padding:18px;text-align:center;color:var(--muted)}.thumbs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}.thumbs img{width:68px;height:68px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.notice{font-size:12px;color:var(--muted);line-height:1.5;margin:10px 2px}
 
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center;z-index:30}
 .modal-bg.open{display:flex}
-.modal-box{width:100%;max-width:640px;max-height:86vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px 24px 0 0;padding:20px 18px 28px}
+.modal-box{width:100%;max-width:640px;max-height:88vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px 24px 0 0;padding:20px 18px 28px}
+.modal-photos{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}.modal-photos img{width:140px;height:140px;object-fit:cover;border-radius:14px;flex-shrink:0}
 .modal-title{margin:6px 0 8px;font-size:20px}
 .modal-price{color:var(--yellow);font-size:18px;font-weight:800;margin-bottom:12px}
 .modal-line{margin-bottom:10px;line-height:1.5;font-size:15px}
@@ -52,7 +53,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <div class="field"><label>Описание</label><textarea id="description" placeholder="Расскажите подробнее..."></textarea></div>
 <div class="field"><label>Контактный телефон</label><input id="phone" placeholder="+373..."></div>
 <div class="field"><label>Как связаться?</label><select id="contact"><option>Telegram</option><option>Viber</option><option>WhatsApp</option><option>Телефон</option></select></div>
-<div class="photoadd">📷 Добавить фотографии (до 6)<input id="photos" type="file" accept="image/*" multiple style="display:block;margin:12px auto 0;max-width:100%"></div>
+<div class="photoadd">📷 Добавить фотографии (до 3)<input id="photos" type="file" accept="image/*" multiple style="display:block;margin:12px auto 0;max-width:100%"><div class="thumbs" id="photoThumbs"></div></div>
 <div class="sectiontitle">ПРЕДПРОСМОТР</div><div class="preview" id="preview">Заполните название и описание — здесь появится ваш текст.</div>
 <button class="primary" id="publish">📣 Опубликовать</button><p class="notice">Объявления сохраняются на сервере и публикуются в общей ленте.</p>
 </section>
@@ -61,8 +62,10 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <section id="profile" class="hidden"><h2>Профиль</h2><div class="card"><b id="username">Пользователь Telegram</b><p class="muted">Ваши контакты и объявления будут доступны здесь.</p></div><div class="card">🐾 ЗооМаркет — мгновенная публикация объявлений.</div></section>
 </main>
 
+<!-- МОДАЛЬНОЕ ОКНО ПРОСМОТРА -->
 <div id="adModal" class="modal-bg" onclick="closeAdModal(event)">
   <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-photos" id="mPhotos"></div>
     <span class="tag" id="mTag"></span>
     <h2 class="modal-title" id="mTitle"></h2>
     <div class="modal-price" id="mPrice"></div>
@@ -72,6 +75,27 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
     <div class="modal-btns">
       <button class="secondary" id="mCopy">📋 Контакт</button>
       <button class="primary" onclick="closeAdModal()">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ СВОЕГО ПОСТА -->
+<div id="editModal" class="modal-bg" onclick="closeEditModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h2 class="modal-title">Редактировать объявление</h2>
+    <div class="field"><label>Название</label><input id="eTitle"></div>
+    <div class="field"><label>Категория</label><select id="eCategory"><option>Животные</option><option>Товары</option><option>Услуги</option></select></div>
+    <div class="row">
+      <div class="field"><label>Цена</label><input id="ePrice"></div>
+      <div class="field"><label>Валюта</label><select id="eCurrency"><option>руб.</option><option>лей</option><option>€</option><option>$</option><option>Бесплатно</option></select></div>
+    </div>
+    <div class="field"><label>Город</label><input id="eCity"></div>
+    <div class="field"><label>Описание</label><textarea id="eDescription"></textarea></div>
+    <div class="field"><label>Телефон</label><input id="ePhone"></div>
+    <div class="field"><label>Как связаться?</label><select id="eContact"><option>Telegram</option><option>Viber</option><option>WhatsApp</option><option>Телефон</option></select></div>
+    <div class="modal-btns">
+      <button class="secondary" onclick="closeEditModal()">Отмена</button>
+      <button class="primary" id="saveEditBtn">💾 Сохранить</button>
     </div>
   </div>
 </div>
@@ -97,7 +121,9 @@ if (tg) {
 
 let allAds = [];
 let userAds = [];
+let selectedPhotos = [];
 let current = 'Все';
+let editingAd = null;
 
 function esc(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({
@@ -113,16 +139,73 @@ function authHeaders() {
   return headers;
 }
 
-function openAdByIndex(idx) {
-  const ad = allAds[idx];
-  if (!ad) return;
+function compressImage(file, maxWidth = 800, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
+function renderThumbs() {
+  const box = document.getElementById('photoThumbs');
+  box.innerHTML = selectedPhotos.map(src => `<img src="${esc(src)}" alt="">`).join('');
+}
+
+document.getElementById('photos').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []).slice(0, 3);
+  selectedPhotos = [];
+  for (const f of files) {
+    try {
+      const compressed = await compressImage(f);
+      selectedPhotos.push(compressed);
+    } catch (err) {
+      console.error('Ошибка сжатия фото:', err);
+    }
+  }
+  renderThumbs();
+});
+
+function getAdPhotos(ad) {
+  if (Array.isArray(ad?.photos) && ad.photos.length) return ad.photos;
+  return [];
+}
+
+function renderThumbHtml(ad) {
+  const photos = getAdPhotos(ad);
+  if (photos.length) {
+    return `<div class="photo"><img src="${esc(photos[0])}" alt=""></div>`;
+  }
+  return `<div class="photo">${esc(ad.emoji || '🐾')}</div>`;
+}
+
+function openAdObj(ad) {
+  if (!ad) return;
   const cat = ad.cat || ad.category || 'Объявление';
   const kind = ad.kind ? ` · ${ad.kind}` : '';
   const desc = ad.desc || ad.description || 'Описание не указано';
   const price = ad.price || 'Цена договорная';
   const city = ad.city || 'Город не указан';
   const contactText = [ad.contact, ad.phone].filter(Boolean).join(' · ') || 'Контакты не указаны';
+  const photos = getAdPhotos(ad);
+
+  const mPhotos = document.getElementById('mPhotos');
+  mPhotos.innerHTML = photos.map(src => `<img src="${esc(src)}" alt="">`).join('');
+  mPhotos.style.display = photos.length ? 'flex' : 'none';
 
   document.getElementById('mTag').textContent = `${cat}${kind}`;
   document.getElementById('mTitle').textContent = ad.title || 'Без названия';
@@ -143,11 +226,88 @@ function openAdByIndex(idx) {
   document.getElementById('adModal').classList.add('open');
 }
 
+function openAdByIndex(idx) {
+  openAdObj(allAds[idx]);
+}
+
 function closeAdModal(e) {
   if (!e || e.target.id === 'adModal') {
     document.getElementById('adModal').classList.remove('open');
   }
 }
+
+function openEditModal(idx) {
+  const ad = userAds[idx];
+  if (!ad) return;
+  editingAd = ad;
+
+  document.getElementById('eTitle').value = ad.title || '';
+  document.getElementById('eCategory').value = ad.category || ad.cat || 'Животные';
+  const rawPrice = String(ad.price || '').replace(/[^\d.,]/g, '').trim();
+  document.getElementById('ePrice').value = rawPrice;
+  document.getElementById('eCurrency').value = ad.currency || 'руб.';
+  document.getElementById('eCity').value = ad.city || '';
+  document.getElementById('eDescription').value = ad.description || ad.desc || '';
+  document.getElementById('ePhone').value = ad.phone || '';
+  document.getElementById('eContact').value = ad.contact || 'Telegram';
+
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal(e) {
+  if (!e || e.target.id === 'editModal') {
+    document.getElementById('editModal').classList.remove('open');
+    editingAd = null;
+  }
+}
+
+document.getElementById('saveEditBtn').onclick = async () => {
+  if (!editingAd) return;
+  const title = document.getElementById('eTitle').value.trim();
+  if (!title) {
+    alert('Введите название объявления');
+    return;
+  }
+
+  const priceNum = document.getElementById('ePrice').value.trim();
+  const currency = document.getElementById('eCurrency').value;
+  const payload = {
+    title,
+    category: document.getElementById('eCategory').value,
+    price: priceNum ? `${priceNum} ${currency}` : currency,
+    currency,
+    city: document.getElementById('eCity').value.trim(),
+    description: document.getElementById('eDescription').value.trim(),
+    phone: document.getElementById('ePhone').value.trim(),
+    contact: document.getElementById('eContact').value
+  };
+
+  if (editingAd.id) {
+    try {
+      const res = await fetch(`${API_URL}/api/ads/${encodeURIComponent(editingAd.id)}`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(`Ошибка сохранения (${res.status}): ${result.detail || 'проверьте сервер'}`);
+        return;
+      }
+      Object.assign(editingAd, result.item || payload);
+    } catch (err) {
+      alert(`Ошибка сети: ${err.message}`);
+      return;
+    }
+  } else {
+    Object.assign(editingAd, payload);
+  }
+
+  closeEditModal();
+  showMy();
+  await loadAds();
+  alert('Объявление обновлено!');
+};
 
 function render(items = allAds) {
   document.getElementById('listings').innerHTML = items.map(x => {
@@ -156,7 +316,7 @@ function render(items = allAds) {
     const desc = x.desc || x.description || '';
     const price = x.price || 'Цена договорная';
     return `<div class="card listing" onclick="openAdByIndex(${realIdx})">
-      <div class="photo">${esc(x.emoji || '🐾')}</div>
+      ${renderThumbHtml(x)}
       <div>
         <span class="tag">${esc(cat)}</span>
         <h3>${esc(x.title)}</h3>
@@ -202,7 +362,10 @@ async function loadMyAds() {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    userAds = Array.isArray(data) ? data : (data.items || []);
+    const fetched = Array.isArray(data) ? data : (data.items || []);
+    if (fetched.length) {
+      userAds = fetched;
+    }
   } catch (err) {
     console.error(err);
   }
@@ -266,7 +429,8 @@ document.getElementById('publish').onclick = async () => {
     city: document.getElementById('city').value.trim(),
     description: document.getElementById('description').value.trim(),
     phone: document.getElementById('phone').value.trim(),
-    contact: document.getElementById('contact').value
+    contact: document.getElementById('contact').value,
+    photos: selectedPhotos
   };
 
   try {
@@ -280,7 +444,11 @@ document.getElementById('publish').onclick = async () => {
       alert(`Ошибка отправки (${res.status}): ${result.detail || result.message || 'проверьте данные'}`);
       return;
     }
-    userAds.unshift({ ...payload, status: result.status || 'approved' });
+    const createdItem = { ...payload, ...(result.item || {}), id: result.id || result.item?.id, status: result.status || 'approved' };
+    userAds.unshift(createdItem);
+    selectedPhotos = [];
+    document.getElementById('photos').value = '';
+    renderThumbs();
     alert('Объявление опубликовано!');
     await loadAds();
     page('home');
@@ -293,7 +461,11 @@ function showMy() {
   const el = document.getElementById('mylist');
   el.className = userAds.length ? '' : 'empty';
   el.innerHTML = userAds.length
-    ? userAds.map(a => `<div class="card"><b>${esc(a.title)}</b><p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.status || 'approved')}</p></div>`).join('')
+    ? userAds.map((a, idx) => `<div class="card">
+        <b>${esc(a.title)}</b>
+        <p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.price || '')} · ${esc(a.status || 'approved')}</p>
+        <button class="secondary small-btn" onclick="openEditModal(${idx})">✏️ Редактировать</button>
+      </div>`).join('')
     : 'Пока нет объявлений.<strong>Создайте первое!</strong>';
 }
 
