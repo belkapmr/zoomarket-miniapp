@@ -1,0 +1,44 @@
+import asyncio
+import os
+
+from aiogram import Bot, Dispatcher
+from aiogram.filters import CommandStart
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, WebAppInfo
+
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "9022361491:AAEz6y0zvihhwkcZQOhm-1UXS_Q91Hmufzc")
+WEBAPP_URL = "https://belkapmr.github.io/zoomarket-miniapp/"
+
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
+
+
+@dp.message(CommandStart())
+async def cmd_start(message: Message):
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="🐾 ОТКРЫТЬ ЗООМАРКЕТ",
+                    web_app=WebAppInfo(url=WEBAPP_URL),
+                )
+            ]
+        ]
+    )
+
+    text = (
+        "🐾 <b>ЗООМАРКЕТ</b>\n"
+        "Животные · товары · услуги\n\n"
+        "🐶 Питомцы, 🛍️ зоотовары, 🩺 ветуслуги и ✂️ груминг — в одном месте.\n"
+        "📣 Публикуйте объявления с фото, редактируйте и удаляйте свои посты.\n\n"
+        "👇👇👇 Нажмите кнопку ниже 👇👇👇"
+    )
+
+    await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
+
+
+async def main():
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
