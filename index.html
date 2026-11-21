@@ -45,7 +45,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <div class="field"><label>Как связаться?</label><select id="contact"><option>Telegram</option><option>Viber</option><option>WhatsApp</option><option>Телефон</option></select></div>
 <div class="photoadd">📷 Добавить фотографии (до 6)<input id="photos" type="file" accept="image/*" multiple style="display:block;margin:12px auto 0;max-width:100%"></div>
 <div class="sectiontitle">ПРЕДПРОСМОТР</div><div class="preview" id="preview">Заполните название и описание — здесь появится ваш текст.</div>
-<button class="primary" id="publish">📣 Отправить на модерацию</button><p class="notice">Демонстрационная версия: для реальной публикации, хранения фотографий и модерации нужно подключить сервер и базу данных.</p>
+<button class="primary" id="publish">📣 Отправить на модерацию</button><p class="notice">Объявления сохраняются на сервере и проходят модерацию перед публикацией в общей ленте.</p>
 </section>
 <section id="my" class="hidden"><h2>Мои объявления</h2><div id="mylist" class="empty">Пока нет объявлений.<strong>Создайте первое!</strong></div></section>
 <section id="saved" class="hidden"><h2>Избранное</h2><div class="empty">❤️ Здесь будут сохранённые объявления.</div></section>
@@ -58,8 +58,8 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <button class="nav" data-page="saved"><span>❤️</span>Избранное</button>
 <button class="nav" data-page="profile"><span>👤</span>Профиль</button>
 </nav>
-<<script>
-const API_URL = "https://democratic-ready-sim-followed.trycloudflare.com";
+<script>
+const API_URL = "https://cooked-finding-least-descending.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 if (tg) {
   tg.ready();
@@ -129,11 +129,29 @@ async function loadAds() {
   }
 }
 
+async function loadMyAds() {
+  if (!tg?.initData) {
+    showMy();
+    return;
+  }
+  try {
+    const res = await fetch(`${API_URL}/api/my-ads`, {
+      headers: authHeaders()
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    userAds = Array.isArray(data) ? data : (data.items || []);
+  } catch (err) {
+    console.error(err);
+  }
+  showMy();
+}
+
 function page(p) {
   document.querySelectorAll('main>section').forEach(s => s.classList.toggle('hidden', s.id !== p));
   document.querySelectorAll('.nav').forEach(b => b.classList.toggle('active', b.dataset.page === p));
   if (p === 'home') loadAds();
-  if (p === 'my') showMy();
+  if (p === 'my') loadMyAds();
 }
 
 document.querySelectorAll('.nav').forEach(b => b.onclick = () => page(b.dataset.page));
@@ -181,12 +199,12 @@ document.getElementById('publish').onclick = async () => {
     kind: document.getElementById('kind').value,
     title,
     category: document.getElementById('category').value,
-    price: priceRaw ? `${priceRaw} ${currency}` : currency,
+    price: priceRaw || currency,
+    currency,
     city: document.getElementById('city').value.trim(),
     description: document.getElementById('description').value.trim(),
     phone: document.getElementById('phone').value.trim(),
-    contact: document.getElementById('contact').value,
-    emoji: '🐾'
+    contact: document.getElementById('contact').value
   };
 
   try {
@@ -200,9 +218,8 @@ document.getElementById('publish').onclick = async () => {
       alert(`Ошибка отправки (${res.status}): ${result.detail || result.message || 'проверьте данные'}`);
       return;
     }
-    userAds.unshift({ ...payload, status: result.status || 'Отправлено на проверку' });
-    alert('Объявление отправлено на сервер!');
-    await loadAds();
+    userAds.unshift({ ...payload, status: result.status || 'pending' });
+    alert('Объявление отправлено на проверку!');
     page('my');
   } catch (err) {
     alert(`Ошибка сети: ${err.message}`);
@@ -213,7 +230,7 @@ function showMy() {
   const el = document.getElementById('mylist');
   el.className = userAds.length ? '' : 'empty';
   el.innerHTML = userAds.length
-    ? userAds.map(a => `<div class="card"><b>${esc(a.title)}</b><p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.status)}</p></div>`).join('')
+    ? userAds.map(a => `<div class="card"><b>${esc(a.title)}</b><p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.status || 'pending')}</p></div>`).join('')
     : 'Пока нет объявлений.<strong>Создайте первое!</strong>';
 }
 
@@ -223,5 +240,4 @@ if (u) {
 }
 
 loadAds();
-</script>
 </script></body></html>
