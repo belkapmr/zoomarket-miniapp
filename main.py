@@ -194,6 +194,24 @@ def update_ad(
     return {"id": ad_id, "item": updated | {"id": ad_id}}
 
 
+@app.delete("/api/ads/{ad_id}")
+def delete_ad(ad_id: str, x_telegram_init_data: str = Header(default="")):
+    tg_user = verify_telegram_init_data(x_telegram_init_data, BOT_TOKEN)
+    user_id = tg_user.get("id")
+
+    doc_ref = db.collection("ads").document(ad_id)
+    snap = doc_ref.get()
+    if not snap.exists:
+        raise HTTPException(status_code=404, detail="Ad not found")
+
+    data = snap.to_dict() or {}
+    if str(data.get("author_id", "")) != str(user_id):
+        raise HTTPException(status_code=403, detail="Forbidden: not the author")
+
+    doc_ref.delete()
+    return {"status": "deleted", "id": ad_id}
+
+
 @app.get("/api/my-ads")
 def get_my_ads(x_telegram_init_data: str = Header(default="")):
     tg_user = verify_telegram_init_data(x_telegram_init_data, BOT_TOKEN)
