@@ -58,25 +58,170 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <button class="nav" data-page="saved"><span>❤️</span>Избранное</button>
 <button class="nav" data-page="profile"><span>👤</span>Профиль</button>
 </nav>
-<script>
-const tg=window.Telegram?.WebApp; if(tg){tg.ready();tg.expand();try{tg.setHeaderColor('#08111f');tg.setBackgroundColor('#08111f')}catch(e){}}
-const demo=[
-{title:'Шотландский котёнок',cat:'Животные',desc:'Ласковый, приучен к лотку. Подробности у владельца.',city:'Тирасполь',price:'800 руб.',emoji:'🐱'},
-{title:'Переноска для животных',cat:'Товары',desc:'Новая переноска для кошек и небольших собак.',city:'Бендеры',price:'250 руб.',emoji:'🧺'},
-{title:'Ветеринар на дом',cat:'Услуги',desc:'Консультация и осмотр домашних животных.',city:'Тирасполь',price:'Договорная',emoji:'🩺'}
-];
-let current='Все', userAds=[];
-function render(items=demo){document.getElementById('listings').innerHTML=items.map(x=>`<div class="card listing"><div class="photo">${x.emoji||'🐾'}</div><div><span class="tag">${x.cat}</span><h3>${esc(x.title)}</h3><div class="muted">${esc(x.city||'Город не указан')} · ${esc(x.desc||'')}</div><div class="price">${esc(x.price||'Цена договорная')}</div></div></div>`).join('')||'<div class="empty">Ничего не найдено</div>'}
-function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function page(p){document.querySelectorAll('main>section').forEach(s=>s.classList.toggle('hidden',s.id!==p));document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.page===p));if(p==='my')showMy()}
-document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>page(b.dataset.page));
-document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{current=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));render(current==='Все'?demo:demo.filter(x=>x.cat===current))});
-document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{page('home');current=b.dataset.cat;render(demo.filter(x=>x.cat===current))});
-document.getElementById('search').oninput=e=>{let q=e.target.value.toLowerCase();render(demo.filter(x=>(current==='Все'||x.cat===current)&&(`${x.title} ${x.desc} ${x.city}`).toLowerCase().includes(q)))};
-['title','kind','category','price','currency','city','description','phone','contact'].forEach(id=>document.getElementById(id).addEventListener('input',updatePreview));
-function updatePreview(){let v=id=>document.getElementById(id).value;document.getElementById('preview').textContent=`${v('kind')}: ${v('title')||'Название объявления'}\nКатегория: ${v('category')}\nГород: ${v('city')||'не указан'}\nЦена: ${v('price')?v('price')+' '+v('currency'):v('currency')}\n${v('description')||'Описание'}\nСвязь: ${v('contact')} ${v('phone')}`;}
-document.getElementById('publish').onclick=()=>{let title=document.getElementById('title').value.trim();if(!title){alert('Введите название объявления');return}let ad={title,cat:document.getElementById('category').value,desc:document.getElementById('description').value,city:document.getElementById('city').value,price:(document.getElementById('price').value||'')+' '+document.getElementById('currency').value,emoji:'🐾',status:'Ожидает модерации'};userAds.unshift(ad);alert('Черновик создан. Для реальной отправки на модерацию нужно подключить сервер.');page('my')};
-function showMy(){let el=document.getElementById('mylist');el.className=userAds.length?'':'empty';el.innerHTML=userAds.length?userAds.map(a=>`<div class="card"><b>${esc(a.title)}</b><p class="muted">${esc(a.city)} · ${esc(a.status)}</p></div>`).join(''):'Пока нет объявлений.<strong>Создайте первое!</strong>'}
-const u=tg?.initDataUnsafe?.user;if(u){document.getElementById('username').textContent=[u.first_name,u.last_name].filter(Boolean).join(' ')||'Пользователь Telegram'}
-render();
+<<script>
+const API_URL = "https://democratic-ready-sim-followed.trycloudflare.com";
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  try {
+    tg.setHeaderColor('#08111f');
+    tg.setBackgroundColor('#08111f');
+  } catch (e) {}
+}
+
+let allAds = [];
+let userAds = [];
+let current = 'Все';
+
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function authHeaders() {
+  const headers = { 'Content-Type': 'application/json' };
+  if (tg?.initData) {
+    headers['X-Telegram-Init-Data'] = tg.initData;
+  }
+  return headers;
+}
+
+function render(items = allAds) {
+  document.getElementById('listings').innerHTML = items.map(x => {
+    const cat = x.cat || x.category || 'Объявление';
+    const desc = x.desc || x.description || '';
+    const price = x.price || 'Цена договорная';
+    return `<div class="card listing">
+      <div class="photo">${esc(x.emoji || '🐾')}</div>
+      <div>
+        <span class="tag">${esc(cat)}</span>
+        <h3>${esc(x.title)}</h3>
+        <div class="muted">${esc(x.city || 'Город не указан')} · ${esc(desc)}</div>
+        <div class="price">${esc(price)}</div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">Пока объявлений нет</div>';
+}
+
+function applyFilters() {
+  const q = (document.getElementById('search').value || '').toLowerCase();
+  const filtered = allAds.filter(x => {
+    const cat = x.cat || x.category || '';
+    const matchesCat = current === 'Все' || cat === current;
+    const text = `${x.title || ''} ${x.desc || x.description || ''} ${x.city || ''}`.toLowerCase();
+    return matchesCat && text.includes(q);
+  });
+  render(filtered);
+}
+
+async function loadAds() {
+  try {
+    const res = await fetch(`${API_URL}/api/ads`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    allAds = Array.isArray(data) ? data : (data.items || []);
+    applyFilters();
+  } catch (err) {
+    document.getElementById('listings').innerHTML =
+      `<div class="empty">Не удалось загрузить объявления с сервера.<br><small>${esc(err.message)}</small></div>`;
+  }
+}
+
+function page(p) {
+  document.querySelectorAll('main>section').forEach(s => s.classList.toggle('hidden', s.id !== p));
+  document.querySelectorAll('.nav').forEach(b => b.classList.toggle('active', b.dataset.page === p));
+  if (p === 'home') loadAds();
+  if (p === 'my') showMy();
+}
+
+document.querySelectorAll('.nav').forEach(b => b.onclick = () => page(b.dataset.page));
+
+document.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => {
+  current = b.dataset.filter;
+  document.querySelectorAll('[data-filter]').forEach(x => x.classList.toggle('active', x === b));
+  applyFilters();
+});
+
+document.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => {
+  page('home');
+  current = b.dataset.cat;
+  document.querySelectorAll('[data-filter]').forEach(x => x.classList.toggle('active', x.dataset.filter === current));
+  applyFilters();
+});
+
+document.getElementById('search').oninput = applyFilters;
+
+['title', 'kind', 'category', 'price', 'currency', 'city', 'description', 'phone', 'contact'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updatePreview);
+});
+
+function updatePreview() {
+  const v = id => document.getElementById(id).value;
+  document.getElementById('preview').textContent =
+    `${v('kind')}: ${v('title') || 'Название объявления'}\n` +
+    `Категория: ${v('category')}\n` +
+    `Город: ${v('city') || 'не указан'}\n` +
+    `Цена: ${v('price') ? v('price') + ' ' + v('currency') : v('currency')}\n` +
+    `${v('description') || 'Описание'}\n` +
+    `Связь: ${v('contact')} ${v('phone')}`;
+}
+
+document.getElementById('publish').onclick = async () => {
+  const title = document.getElementById('title').value.trim();
+  if (!title) {
+    alert('Введите название объявления');
+    return;
+  }
+
+  const priceRaw = document.getElementById('price').value.trim();
+  const currency = document.getElementById('currency').value;
+  const payload = {
+    kind: document.getElementById('kind').value,
+    title,
+    category: document.getElementById('category').value,
+    price: priceRaw ? `${priceRaw} ${currency}` : currency,
+    city: document.getElementById('city').value.trim(),
+    description: document.getElementById('description').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    contact: document.getElementById('contact').value,
+    emoji: '🐾'
+  };
+
+  try {
+    const res = await fetch(`${API_URL}/api/ads`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`Ошибка отправки (${res.status}): ${result.detail || result.message || 'проверьте данные'}`);
+      return;
+    }
+    userAds.unshift({ ...payload, status: result.status || 'Отправлено на проверку' });
+    alert('Объявление отправлено на сервер!');
+    await loadAds();
+    page('my');
+  } catch (err) {
+    alert(`Ошибка сети: ${err.message}`);
+  }
+};
+
+function showMy() {
+  const el = document.getElementById('mylist');
+  el.className = userAds.length ? '' : 'empty';
+  el.innerHTML = userAds.length
+    ? userAds.map(a => `<div class="card"><b>${esc(a.title)}</b><p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.status)}</p></div>`).join('')
+    : 'Пока нет объявлений.<strong>Создайте первое!</strong>';
+}
+
+const u = tg?.initDataUnsafe?.user;
+if (u) {
+  document.getElementById('username').textContent = [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Пользователь Telegram';
+}
+
+loadAds();
+</script>
 </script></body></html>
