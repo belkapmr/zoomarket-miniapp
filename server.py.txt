@@ -1,0 +1,324 @@
+from datetime import datetime, timezone
+import hashlib
+import hmac
+import json
+import os
+from typing import Any
+from urllib.parse import parse_qsl
+
+from fastapi import APIRouter, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+import firebase_admin
+from firebase_admin import firestore
+import httpx
+from pydantic import BaseModel, Field
+
+if not firebase_admin._apps:
+    firebase_admin.initialize_app()
+
+db = firestore.client()
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+
+app = FastAPI(title="ZooMarket API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+api = APIRouter(prefix="/api", tags=["zoomarket"])
+
+
+class AdCreateIn(BaseModel):
+    kind: str = "Объявление"
+    title: str = Field(..., min_length=1, max_length=200)
+    category: str = "Животные"
+    price: str | None = None
+    currency: str | None = None
+    city: str | None = None
+    description: str | None = None
+    phone: str | None = None
+    contact: str | None = None
+    photos: list[str] = []
+    is_shop: bool = False
+    shop_id: str | None = None
+    shop_name: str | None = None
+    is_grooming: bool = False
+    grooming_dates: list[str] = []
+    grooming_times: list[str] = []
+    seller_id: str | None = None
+    seller_name: str | None = None
+    seller_username: str | None = None
+
+
+class AdUpdateIn(BaseModel):
+    title: str | None = None
+    category: str | None = None
+    price: str | None = None
+    currency: str | None = None
+    city: str | None = None
+    description: str | None = None
+    phone: str | None = None
+    contact: str | None = None
+
+
+class GroomingBookingIn(BaseModel):
+    ad_id: str | None = None
+    groomer_id: str
+    groomer_name: str | None = None
+    service_title: str | None = None
+    date: str = Field(..., min_length=1, max_length=40)
+    time: str = Field(..., min_length=1, max_length=40)
+    pet_and_tasks: str = Field(..., min_length=2, max_length=1000)
+    client_name: str = Field(..., min_length=1, max_length=120)
+    client_phone: str = Field(..., min_length=3, max_length=60)
+
+
+class ReviewIn(BaseModel):
+    rating: int = Field(..., ge=1, le=5)
+    text: str = Field(..., min_length=1, max_length=1000)
+    author_name: str | None = "Покупатель"
+
+
+def parse_tg_user(init_data: str | None) -> dict[str, Any] | None:
+    if not init_data:
+        return None
+    try:
+        params = dict(parse_qsl(init_data, keep_blank_values=True))
+        if BOT_TOKEN and "hash" in params:
+            received_hash = params.pop("hash")
+            check_str = "\n".join(f"{k}={v}" for k, v in sorted(params.items()))
+            secret = hmac.new(b"WebAppData", BOT_TOKEN.encode(), hashlib.sha256).digest()
+            calc_hash = hmac.new(secret, check_str.encode(), hashlib.sha256).hexdigest()
+            if not hmac.compare_digest(calc_hash, received_hash):
+                return None
+        if params.get("user"):
+            return json.loads(params["user"])
+    except Exception:
+        return None
+    return None
+
+
+def get_tg_user(request: Request) -> dict[str, Any] | None:
+    return parse_tg_user(request.headers.get("X-Telegram-Init-Data"))
+
+
+async def send_tg_message(chat_id: str | int, text: str, reply_markup: dict | None = None):
+    if not BOT_TOKEN:
+        return
+    cid = str(chat_id)
+    if not cid.isdigit():
+        return
+    payload: dict[str, Any] = {"chat_id": int(cid), "text": text, "parse_mode": "HTML"}
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            await client.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", json=payload)
+    except Exception:
+        pass
+
+
+@api.get("/ads")
+def list_ads():
+    docs = db.collection("ads").stream()
+    items = []
+    for d in docs:
+        row = d.to_dict() or {}
+        row["id"] = row.get("id") or d.id
+        items.append(row)
+    items.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    return {"items": items}
+
+
+@api.get("/my-ads")
+def list_my_ads(request: Request):
+    user = get_tg_user(request)
+    uid = str(user["id"]) if user and user.get("id") else ""
+    docs = db.collection("ads").stream()
+    items = []
+    for d in docs:
+        row = d.to_dict() or {}
+        row["id"] = row.get("id") or d.id
+        author = str(row.get("seller_id") or row.get("shop_id") or "")
+        if not uid or author == uid:
+            items.append(row)
+    items.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    return {"items": items}
+
+
+@api.post("/ads")
+def create_ad(payload: AdCreateIn, request: Request):
+    user = get_tg_user(request)
+    uid = str(user["id"]) if user and user.get("id") else None
+    now_iso = datetime.now(timezone.utc).isoformat()
+    doc_ref = db.collection("ads").document()
+    data = payload.model_dump()
+    data.update({
+        "id": doc_ref.id,
+        "seller_id": data.get("seller_id") or uid,
+        "status": "approved",
+        "created_at": now_iso,
+    })
+    doc_ref.set(data)
+    return {"ok": True, "id": doc_ref.id, "item": data, "status": "approved"}
+
+
+@api.patch("/ads/{ad_id}")
+def update_ad(ad_id: str, payload: AdUpdateIn):
+    doc_ref = db.collection("ads").document(ad_id)
+    if not doc_ref.get().exists:
+        raise HTTPException(status_code=404, detail="Объявление не найдено")
+    updates = {k: v for k, v in payload.model_dump().items() if v is not None}
+    doc_ref.update(updates)
+    updated = doc_ref.get().to_dict() or {}
+    updated["id"] = ad_id
+    return {"ok": True, "item": updated}
+
+
+@api.delete("/ads/{ad_id}")
+def delete_ad(ad_id: str):
+    doc_ref = db.collection("ads").document(ad_id)
+    if not doc_ref.get().exists:
+        raise HTTPException(status_code=404, detail="Объявление не найдено")
+    doc_ref.delete()
+    return {"ok": True, "id": ad_id}
+
+
+@api.get("/grooming/booked-slots")
+def get_booked_slots(groomer_id: str, ad_id: str | None = None):
+    docs = db.collection("grooming_bookings").where("groomer_id", "==", str(groomer_id)).stream()
+    taken = []
+    for d in docs:
+        item = d.to_dict() or {}
+        if ad_id and item.get("ad_id") and str(item.get("ad_id")) != str(ad_id):
+            continue
+        if item.get("status") in ("pending", "confirmed"):
+            taken.append({"date": item.get("date"), "time": item.get("time"), "status": item.get("status")})
+    return {"taken_slots": taken}
+
+
+@api.post("/grooming/bookings")
+async def create_grooming_booking(payload: GroomingBookingIn, request: Request):
+    user = get_tg_user(request)
+    client_id = str(user["id"]) if user and user.get("id") else None
+    gid = str(payload.groomer_id)
+    date_val = payload.date.strip()
+    time_val = payload.time.strip()
+
+    existing = db.collection("grooming_bookings").where("groomer_id", "==", gid).stream()
+    for d in existing:
+        row = d.to_dict() or {}
+        if row.get("date") == date_val and row.get("time") == time_val and row.get("status") == "confirmed":
+            raise HTTPException(status_code=409, detail="Это время уже занято и подтверждено мастером")
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    doc_ref = db.collection("grooming_bookings").document()
+    booking_doc = {
+        "id": doc_ref.id,
+        "ad_id": payload.ad_id,
+        "groomer_id": gid,
+        "groomer_name": payload.groomer_name or f"Мастер #{gid}",
+        "service_title": payload.service_title or "Груминг",
+        "client_id": client_id,
+        "client_name": payload.client_name.strip(),
+        "client_phone": payload.client_phone.strip(),
+        "date": date_val,
+        "time": time_val,
+        "pet_and_tasks": payload.pet_and_tasks.strip(),
+        "status": "pending",
+        "created_at": now_iso,
+    }
+    doc_ref.set(booking_doc)
+
+    markup = {
+        "inline_keyboard": [[
+            {"text": "✅ Подтвердить запись", "callback_data": f"groom_confirm:{booking_doc['id']}"},
+            {"text": "❌ Отклонить", "callback_data": f"groom_reject:{booking_doc['id']}"},
+        ]]
+    }
+    await send_tg_message(
+        gid,
+        f"✂️ <b>Новая заявка на груминг #{booking_doc['id'][:8]}</b>\n"
+        f"Дата и время: <b>{date_val} в {time_val}</b>\n"
+        f"Клиент: <b>{booking_doc['client_name']}</b> (<code>{booking_doc['client_phone']}</code>)\n"
+        f"Питомец и задачи: {booking_doc['pet_and_tasks']}\n\n"
+        f"Статус: ⏳ <i>Ожидает подтверждения мастера.</i>",
+        reply_markup=markup,
+    )
+    return {"ok": True, "id": doc_ref.id, "item": booking_doc, "status": "pending"}
+
+
+@api.get("/grooming/bookings")
+def list_grooming_bookings(request: Request, groomer_id: str | None = None):
+    user = get_tg_user(request)
+    gid = str(groomer_id or (user["id"] if user and user.get("id") else ""))
+    if not gid:
+        raise HTTPException(status_code=400, detail="Не указан groomer_id")
+    docs = db.collection("grooming_bookings").where("groomer_id", "==", gid).stream()
+    items = []
+    for d in docs:
+        row = d.to_dict() or {}
+        row["id"] = row.get("id") or d.id
+        items.append(row)
+    items.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    return {"items": items}
+
+
+@api.post("/grooming/bookings/{booking_id}/confirm")
+async def confirm_grooming_booking(booking_id: str):
+    doc_ref = db.collection("grooming_bookings").document(booking_id)
+    snap = doc_ref.get()
+    if not snap.exists:
+        raise HTTPException(status_code=404, detail="Запись не найдена")
+    booking = snap.to_dict() or {}
+    now_iso = datetime.now(timezone.utc).isoformat()
+    doc_ref.update({"status": "confirmed", "confirmed_at": now_iso})
+    if booking.get("client_id"):
+        await send_tg_message(
+            booking["client_id"],
+            f"✅ <b>Запись на груминг подтверждена!</b>\n"
+            f"Дата и время: <b>{booking.get('date')} в {booking.get('time')}</b>\n"
+            f"Питомец и задачи: {booking.get('pet_and_tasks')}",
+        )
+    booking["id"] = booking_id
+    booking["status"] = "confirmed"
+    return {"ok": True, "item": booking, "status": "confirmed"}
+
+
+@api.get("/sellers/{seller_id}")
+def get_seller(seller_id: str):
+    docs = list(db.collection("seller_reviews").where("seller_id", "==", str(seller_id)).stream())
+    reviews = []
+    for d in docs:
+        row = d.to_dict() or {}
+        row["id"] = row.get("id") or d.id
+        reviews.append(row)
+    reviews.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    avg = round(sum(int(r.get("rating", 0)) for r in reviews) / len(reviews), 1) if reviews else 0.0
+    return {
+        "seller_id": str(seller_id),
+        "reviews": reviews,
+        "reviews_count": len(reviews),
+        "rating_avg": avg,
+    }
+
+
+@api.post("/sellers/{seller_id}/reviews")
+def create_seller_review(seller_id: str, payload: ReviewIn):
+    now_iso = datetime.now(timezone.utc).isoformat()
+    doc_ref = db.collection("seller_reviews").document()
+    doc_ref.set({
+        "id": doc_ref.id,
+        "seller_id": str(seller_id),
+        "rating": payload.rating,
+        "text": payload.text.strip(),
+        "author_name": (payload.author_name or "Покупатель").strip(),
+        "created_at": now_iso,
+    })
+    return get_seller(seller_id)
+
+
+app.include_router(api)
