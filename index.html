@@ -11,12 +11,21 @@ header{padding:18px 18px 10px;position:sticky;top:0;background:rgba(8,17,31,.96)
 .brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:15px;background:var(--yellow);display:grid;place-items:center;font-size:27px}.brand h1{font-size:21px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
 main{padding:16px}.tabs{display:flex;gap:8px;overflow:auto;margin:8px 0 16px}.chip{border:1px solid var(--line);background:var(--panel);color:#bdc9d8;padding:10px 15px;border-radius:24px;white-space:nowrap;font-weight:600}.chip.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
 .searchbox,.card,.field,.preview{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:15px;margin-bottom:13px}.searchbox input{background:none;border:0;color:white;font-size:16px;width:100%;outline:0}.sectiontitle{font-size:13px;color:var(--muted);font-weight:800;letter-spacing:1px;margin:22px 0 12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center}.category .emoji{font-size:30px}.category b{display:block;margin-top:7px}.listing{display:flex;gap:12px}.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px}.listing h3{font-size:16px;margin:2px 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.price{color:var(--yellow);font-weight:800;margin-top:8px}.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center;cursor:pointer}.category .emoji{font-size:30px}.category b{display:block;margin-top:7px}.listing{display:flex;gap:12px;cursor:pointer;transition:transform .12s ease,border-color .12s ease}.listing:active{transform:scale(.99);border-color:var(--yellow)}.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px}.listing h3{font-size:16px;margin:2px 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.price{color:var(--yellow);font-weight:800;margin-top:8px}.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px}
 button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:var(--yellow);color:#111;width:100%}.secondary{background:var(--panel2);color:white;border:1px solid var(--line)}.purple{background:#302650;color:#d5c8ff;border:1px solid #4b3b79}
 .field label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}.field input,.field textarea,.field select{width:100%;background:transparent;border:0;outline:0;color:white;font:16px inherit}.field textarea{min-height:90px;resize:vertical}.field select option{background:var(--panel)}
 .row{display:flex;gap:10px}.row>*{flex:1}.bottom{position:fixed;bottom:0;left:0;right:0;background:#0b1728;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:10}.nav{background:none;color:var(--muted);padding:5px 4px;font-size:11px;flex:1}.nav span{display:block;font-size:23px;margin-bottom:3px}.nav.active{color:var(--yellow)}
 .hidden{display:none!important}.empty{text-align:center;padding:45px 15px;color:var(--muted)}.empty strong{display:block;color:white;font-size:19px;margin:10px}.preview{border-style:dashed}.preview pre{white-space:pre-wrap;color:#c5d0de;font:14px/1.5 inherit;margin:8px 0}
 .photoadd{border:1px dashed #45617f;border-radius:15px;padding:18px;text-align:center;color:var(--muted)}.notice{font-size:12px;color:var(--muted);line-height:1.5;margin:10px 2px}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center;z-index:30}
+.modal-bg.open{display:flex}
+.modal-box{width:100%;max-width:640px;max-height:86vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px 24px 0 0;padding:20px 18px 28px}
+.modal-title{margin:6px 0 8px;font-size:20px}
+.modal-price{color:var(--yellow);font-size:18px;font-weight:800;margin-bottom:12px}
+.modal-line{margin-bottom:10px;line-height:1.5;font-size:15px}
+.modal-btns{display:flex;gap:10px;margin-top:16px}
+.modal-btns>*{flex:1}
 </style></head>
 <body>
 <header><div class="brand"><div class="logo">🐾</div><div><h1>ЗооМаркет</h1><p>Животные · товары · услуги</p></div></div></header>
@@ -34,7 +43,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <div class="sectiontitle">ПОСЛЕДНИЕ ОБЪЯВЛЕНИЯ</div><div id="listings"></div>
 </section>
 <section id="create" class="hidden">
-<h2>Разместить объявление</h2><p class="muted">Заполните информацию — объявление отправится на проверку.</p>
+<h2>Разместить объявление</h2><p class="muted">Заполните информацию — объявление сразу появится в ленте.</p>
 <div class="field"><label>Что размещаем?</label><select id="kind"><option>Животное</option><option>Зоотовар</option><option>Услуга</option><option>Отдам даром</option><option>Ищу</option></select></div>
 <div class="field"><label>Название объявления</label><input id="title" placeholder="Например: Щенки корги"></div>
 <div class="field"><label>Категория</label><select id="category"><option>Животные</option><option>Товары</option><option>Услуги</option></select></div>
@@ -45,12 +54,28 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <div class="field"><label>Как связаться?</label><select id="contact"><option>Telegram</option><option>Viber</option><option>WhatsApp</option><option>Телефон</option></select></div>
 <div class="photoadd">📷 Добавить фотографии (до 6)<input id="photos" type="file" accept="image/*" multiple style="display:block;margin:12px auto 0;max-width:100%"></div>
 <div class="sectiontitle">ПРЕДПРОСМОТР</div><div class="preview" id="preview">Заполните название и описание — здесь появится ваш текст.</div>
-<button class="primary" id="publish">📣 Отправить на модерацию</button><p class="notice">Объявления сохраняются на сервере и проходят модерацию перед публикацией в общей ленте.</p>
+<button class="primary" id="publish">📣 Опубликовать</button><p class="notice">Объявления сохраняются на сервере и публикуются в общей ленте.</p>
 </section>
 <section id="my" class="hidden"><h2>Мои объявления</h2><div id="mylist" class="empty">Пока нет объявлений.<strong>Создайте первое!</strong></div></section>
-<section id="saved" class="hidden"><h2>Избранное</h2><div class="empty">❤️ Здесь будут сохранённые объявления.</div></section>
-<section id="profile" class="hidden"><h2>Профиль</h2><div class="card"><b id="username">Пользователь Telegram</b><p class="muted">Ваши контакты и объявления будут доступны здесь.</p></div><div class="card">🛡️ Объявления проходят модерацию перед публикацией.</div></section>
+<section id="saved" class="hidden"><h2>Избранное</h2><div id="savedlist" class="empty">❤️ Здесь будут сохранённые объявления.</div></section>
+<section id="profile" class="hidden"><h2>Профиль</h2><div class="card"><b id="username">Пользователь Telegram</b><p class="muted">Ваши контакты и объявления будут доступны здесь.</p></div><div class="card">🐾 ЗооМаркет — мгновенная публикация объявлений.</div></section>
 </main>
+
+<div id="adModal" class="modal-bg" onclick="closeAdModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <span class="tag" id="mTag"></span>
+    <h2 class="modal-title" id="mTitle"></h2>
+    <div class="modal-price" id="mPrice"></div>
+    <div class="modal-line" id="mCity"></div>
+    <div class="modal-line" id="mDesc"></div>
+    <div class="modal-line" id="mContact"></div>
+    <div class="modal-btns">
+      <button class="secondary" id="mCopy">📋 Контакт</button>
+      <button class="primary" onclick="closeAdModal()">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <nav class="bottom">
 <button class="nav active" data-page="home"><span>🔎</span>Поиск</button>
 <button class="nav" data-page="create"><span>📣</span>Разместить</button>
@@ -88,12 +113,49 @@ function authHeaders() {
   return headers;
 }
 
+function openAdByIndex(idx) {
+  const ad = allAds[idx];
+  if (!ad) return;
+
+  const cat = ad.cat || ad.category || 'Объявление';
+  const kind = ad.kind ? ` · ${ad.kind}` : '';
+  const desc = ad.desc || ad.description || 'Описание не указано';
+  const price = ad.price || 'Цена договорная';
+  const city = ad.city || 'Город не указан';
+  const contactText = [ad.contact, ad.phone].filter(Boolean).join(' · ') || 'Контакты не указаны';
+
+  document.getElementById('mTag').textContent = `${cat}${kind}`;
+  document.getElementById('mTitle').textContent = ad.title || 'Без названия';
+  document.getElementById('mPrice').textContent = price;
+  document.getElementById('mCity').textContent = `📍 Город: ${city}`;
+  document.getElementById('mDesc').textContent = `📝 Описание: ${desc}`;
+  document.getElementById('mContact').textContent = `📞 Связь: ${contactText}`;
+
+  document.getElementById('mCopy').onclick = () => {
+    const val = ad.phone || contactText;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(val).then(() => alert(`Скопировано: ${val}`)).catch(() => alert(`Контакт: ${val}`));
+    } else {
+      alert(`Контакт: ${val}`);
+    }
+  };
+
+  document.getElementById('adModal').classList.add('open');
+}
+
+function closeAdModal(e) {
+  if (!e || e.target.id === 'adModal') {
+    document.getElementById('adModal').classList.remove('open');
+  }
+}
+
 function render(items = allAds) {
   document.getElementById('listings').innerHTML = items.map(x => {
+    const realIdx = allAds.indexOf(x);
     const cat = x.cat || x.category || 'Объявление';
     const desc = x.desc || x.description || '';
     const price = x.price || 'Цена договорная';
-    return `<div class="card listing">
+    return `<div class="card listing" onclick="openAdByIndex(${realIdx})">
       <div class="photo">${esc(x.emoji || '🐾')}</div>
       <div>
         <span class="tag">${esc(cat)}</span>
@@ -218,9 +280,10 @@ document.getElementById('publish').onclick = async () => {
       alert(`Ошибка отправки (${res.status}): ${result.detail || result.message || 'проверьте данные'}`);
       return;
     }
-    userAds.unshift({ ...payload, status: result.status || 'pending' });
-    alert('Объявление отправлено на проверку!');
-    page('my');
+    userAds.unshift({ ...payload, status: result.status || 'approved' });
+    alert('Объявление опубликовано!');
+    await loadAds();
+    page('home');
   } catch (err) {
     alert(`Ошибка сети: ${err.message}`);
   }
@@ -230,7 +293,7 @@ function showMy() {
   const el = document.getElementById('mylist');
   el.className = userAds.length ? '' : 'empty';
   el.innerHTML = userAds.length
-    ? userAds.map(a => `<div class="card"><b>${esc(a.title)}</b><p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.status || 'pending')}</p></div>`).join('')
+    ? userAds.map(a => `<div class="card"><b>${esc(a.title)}</b><p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.status || 'approved')}</p></div>`).join('')
     : 'Пока нет объявлений.<strong>Создайте первое!</strong>';
 }
 
