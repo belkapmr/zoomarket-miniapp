@@ -104,7 +104,11 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <div class="field"><label>Что размещаем?</label><select id="kind"><option>Животное</option><option>Зоотовар</option><option>Услуга</option><option>Отдам даром</option><option>Ищу</option></select></div>
 <div class="field"><label>Название объявления</label><input id="title" placeholder="Например: Щенки корги / Груминг собак"></div>
 <div class="field"><label>Категория</label><select id="category"><option>Животные</option><option>Товары</option><option>Услуги</option></select></div>
-<div class="row"><div class="field"><label>Цена</label><input id="price" placeholder="Например: 500"></div><div class="field"><label>Валюта</label><select id="currency"><option>руб.</option><option>лей</option><option>€</option><option>$</option><option>Бесплатно</option></select></div></div>
+<div class="row">
+  <div class="field"><label>Цена</label><input id="price" placeholder="Например: 500"></div>
+  <div class="field"><label>Валюта</label><select id="currency"><option>руб.</option><option>лей</option><option>€</option><option>$</option><option>Бесплатно</option></select></div>
+</div>
+<div class="field"><label>Количество в наличии (шт.)</label><input id="stock" type="number" min="0" step="1" value="1" placeholder="Например: 5"></div>
 <div class="field"><label>Город</label><input id="city" placeholder="Тирасполь, Бендеры..."></div>
 <div class="field"><label>Описание</label><textarea id="description" placeholder="Расскажите подробнее..."></textarea></div>
 <div class="field"><label>Контактный телефон</label><input id="phone" placeholder="+373..."></div>
@@ -254,6 +258,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
     <span class="groom-badge hidden" id="mGroomBadge">✂️ ГРУМИНГ</span>
     <h2 class="modal-title" id="mTitle"></h2>
     <div class="modal-price" id="mPrice"></div>
+    <div class="modal-line" id="mStock"></div>
     <div class="modal-line" id="mCity"></div>
     <div class="modal-line" id="mDesc"></div>
     <div class="modal-line" id="mContact"></div>
@@ -329,6 +334,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
       <div class="field"><label>Цена</label><input id="ePrice"></div>
       <div class="field"><label>Валюта</label><select id="eCurrency"><option>руб.</option><option>лей</option><option>€</option><option>$</option><option>Бесплатно</option></select></div>
     </div>
+    <div class="field"><label>Количество в наличии (шт.)</label><input id="eStock" type="number" min="0" step="1"></div>
     <div class="field"><label>Город</label><input id="eCity"></div>
     <div class="field"><label>Описание</label><textarea id="eDescription"></textarea></div>
     <div class="field"><label>Телефон</label><input id="ePhone"></div>
@@ -406,6 +412,42 @@ function isGroomingAd(ad) {
   return text.includes('груминг');
 }
 
+function getAdStock(ad) {
+  const raw = ad?.stock ?? ad?.quantity ?? ad?.available_qty;
+  if (raw === undefined || raw === null || raw === '') return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : null;
+}
+
+function contactPerson({ phone = '', username = '', userId = '', label = 'контакт' }) {
+  const cleanUser = String(username || '').replace(/^@/, '').trim();
+  if (cleanUser) {
+    const url = `https://t.me/${encodeURIComponent(cleanUser)}`;
+    if (tg?.openTelegramLink) tg.openTelegramLink(url);
+    else window.open(url, '_blank');
+    return;
+  }
+  if (userId && /^\d+$/.test(String(userId).trim())) {
+    const tgUrl = `tg://user?id=${encodeURIComponent(String(userId).trim())}`;
+    if (tg?.openLink) tg.openLink(tgUrl);
+    else window.location.href = tgUrl;
+    return;
+  }
+  const cleanPhone = String(phone || '').trim();
+  if (cleanPhone) {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(cleanPhone).catch(() => {});
+    }
+    const telHref = `tel:${cleanPhone.replace(/[^\d+]/g, '')}`;
+    const goCall = confirm(`Связаться (${label}): ${cleanPhone}\nНомер скопирован. Открыть звонок?`);
+    if (goCall && telHref.length > 4) {
+      window.location.href = telHref;
+    }
+    return;
+  }
+  alert(`Контакт (${label}) не указан.`);
+}
+
 function parseSlotList(val, fallbackList) {
   const raw = String(val || '').trim();
   if (!raw) return fallbackList;
@@ -469,6 +511,12 @@ function updateCartBadge() {
 
 function addAdToCart(ad) {
   if (!ad) return;
+  const stock = getAdStock(ad);
+  if (stock !== null && stock <= 0) {
+    alert('Этого товара сейчас нет в наличии.');
+    return;
+  }
+
   const shopId = getSellerKey(ad);
   const shopName = getSellerDisplayName(ad);
   const adId = String(ad.id || ad.title);
@@ -482,7 +530,13 @@ function addAdToCart(ad) {
 
   const existing = cartItems.find(it => String(it.ad_id) === adId);
   if (existing) {
-    existing.qty = (Number(existing.qty) || 1) + 1;
+    const nextQty = (Number(existing.qty) || 1) + 1;
+    if (stock !== null && nextQty > stock) {
+      alert(`В наличии доступно только ${stock} шт.`);
+      return;
+    }
+    existing.qty = nextQty;
+    if (stock !== null) existing.max_stock = stock;
   } else {
     cartItems.push({
       ad_id: adId,
@@ -492,6 +546,7 @@ function addAdToCart(ad) {
       price: ad.price || '0',
       unit_price: parsePriceNum(ad.price),
       category: ad.cat || ad.category || '',
+      max_stock: stock,
       qty: 1
     });
   }
@@ -513,7 +568,7 @@ function renderCartModal() {
     <div class="cart-item">
       <div>
         <b>${esc(it.title)}</b>
-        <div class="muted">${esc(it.shop_name)} · ${esc(it.price || '0')}</div>
+        <div class="muted">${esc(it.shop_name)} · ${esc(it.price || '0')}${it.max_stock != null ? ` · в наличии: ${it.max_stock} шт.` : ''}</div>
       </div>
       <div class="qty-box">
         <button type="button" class="qty-btn" onclick="changeCartQty(${idx}, -1)">−</button>
@@ -539,7 +594,12 @@ function renderCartModal() {
 function changeCartQty(idx, delta) {
   const item = cartItems[idx];
   if (!item) return;
-  const nextQty = (Number(item.qty) || 1) + delta;
+  const currentQty = Number(item.qty) || 1;
+  if (delta > 0 && item.max_stock != null && currentQty + delta > Number(item.max_stock)) {
+    alert(`В наличии доступно только ${item.max_stock} шт.`);
+    return;
+  }
+  const nextQty = currentQty + delta;
   if (nextQty <= 0) {
     cartItems.splice(idx, 1);
   } else {
@@ -575,6 +635,7 @@ document.getElementById('submitOrderBtn')?.addEventListener('click', async () =>
     return;
   }
 
+  const tgUser = tg?.initDataUnsafe?.user;
   const shopId = String(cartItems[0].shop_id);
   const shopName = cartItems[0].shop_name;
 
@@ -585,6 +646,8 @@ document.getElementById('submitOrderBtn')?.addEventListener('click', async () =>
       body: JSON.stringify({
         shop_id: shopId,
         shop_name: shopName,
+        buyer_id: tgUser?.id ? String(tgUser.id) : '',
+        buyer_username: tgUser?.username || '',
         buyer_name: buyerName,
         buyer_phone: buyerPhone,
         comment,
@@ -599,6 +662,7 @@ document.getElementById('submitOrderBtn')?.addEventListener('click', async () =>
     cartItems = [];
     saveCart();
     closeCartModal();
+    await loadAds();
     alert('Заказ отправлен магазину! Ожидайте подтверждения.');
   } catch (err) {
     alert(`Ошибка сети: ${err.message}`);
@@ -712,14 +776,19 @@ document.getElementById('gSubmitBookingBtn')?.addEventListener('click', async ()
     return;
   }
 
+  const tgUser = tg?.initDataUnsafe?.user;
   const payload = {
     ad_id: activeGroomingAd.id ? String(activeGroomingAd.id) : null,
     groomer_id: getSellerKey(activeGroomingAd),
     groomer_name: getSellerDisplayName(activeGroomingAd),
+    groomer_phone: activeGroomingAd.phone || '',
+    groomer_username: activeGroomingAd.seller_username || activeGroomingAd.username || '',
     service_title: activeGroomingAd.title || 'Груминг',
     date: selectedGroomDate,
     time: selectedGroomTime,
     pet_and_tasks: petAndTasks,
+    client_id: tgUser?.id ? String(tgUser.id) : '',
+    client_username: tgUser?.username || '',
     client_name: clientName,
     client_phone: clientPhone
   };
@@ -813,6 +882,7 @@ function openAdObj(ad, myIdx = -1) {
   const kind = ad.kind ? ` · ${ad.kind}` : '';
   const desc = ad.desc || ad.description || 'Описание не указано';
   const price = ad.price || 'Цена договорная';
+  const stock = getAdStock(ad);
   const city = ad.city || 'Город не указан';
   const contactText = [ad.contact, ad.phone].filter(Boolean).join(' · ') || 'Контакты не указаны';
   const photos = getAdPhotos(ad);
@@ -827,13 +897,30 @@ function openAdObj(ad, myIdx = -1) {
 
   document.getElementById('mTitle').textContent = ad.title || 'Без названия';
   document.getElementById('mPrice').textContent = price;
+
+  const mStock = document.getElementById('mStock');
+  if (stock !== null) {
+    mStock.classList.remove('hidden');
+    mStock.textContent = stock > 0 ? `📦 В наличии: ${stock} шт.` : '📦 Нет в наличии (0 шт.)';
+  } else {
+    mStock.classList.add('hidden');
+  }
+
   document.getElementById('mCity').textContent = `📍 Город: ${city}`;
   document.getElementById('mDesc').textContent = `📝 Описание: ${desc}`;
   document.getElementById('mContact').textContent = `📞 Связь: ${contactText}`;
 
   const shopActionBox = document.getElementById('mShopActionBox');
   shopActionBox.classList.toggle('hidden', !isShopAd(ad));
-  document.getElementById('mAddToCartBtn').onclick = () => addAdToCart(ad);
+  const addBtn = document.getElementById('mAddToCartBtn');
+  if (stock !== null && stock <= 0) {
+    addBtn.disabled = true;
+    addBtn.textContent = '❌ Нет в наличии';
+  } else {
+    addBtn.disabled = false;
+    addBtn.textContent = '🛒 Добавить в корзину';
+  }
+  addBtn.onclick = () => addAdToCart(ad);
 
   const groomActionBox = document.getElementById('mGroomActionBox');
   groomActionBox.classList.toggle('hidden', !isGroomingAd(ad));
@@ -910,25 +997,12 @@ function renderSellerReviews(reviews = []) {
 }
 
 function contactSellerDirect(ad) {
-  const cleanUser = String(ad?.seller_username || ad?.username || '').replace(/^@/, '');
-  if (cleanUser) {
-    const url = `https://t.me/${encodeURIComponent(cleanUser)}`;
-    if (tg?.openTelegramLink) tg.openTelegramLink(url);
-    else window.open(url, '_blank');
-    return;
-  }
-  const tgId = ad?.seller_id || ad?.author_id;
-  if (tgId && /^\d+$/.test(String(tgId))) {
-    const tgUrl = `tg://user?id=${encodeURIComponent(String(tgId))}`;
-    if (tg?.openLink) tg.openLink(tgUrl);
-    else window.location.href = tgUrl;
-    return;
-  }
-  const contactVal = ad?.phone || ad?.contact || 'Контакты не указаны';
-  if (navigator.clipboard?.writeText && ad?.phone) {
-    navigator.clipboard.writeText(ad.phone).catch(() => {});
-  }
-  alert(`Контакт: ${contactVal}`);
+  contactPerson({
+    phone: ad?.phone || '',
+    username: ad?.seller_username || ad?.username || '',
+    userId: ad?.seller_id || ad?.author_id || '',
+    label: getSellerDisplayName(ad)
+  });
 }
 
 async function openSellerProfile(ad) {
@@ -1036,6 +1110,8 @@ function openEditModal(idx) {
   const rawPrice = String(ad.price || '').replace(/[^\d.,]/g, '').trim();
   document.getElementById('ePrice').value = rawPrice;
   document.getElementById('eCurrency').value = ad.currency || 'руб.';
+  const stock = getAdStock(ad);
+  document.getElementById('eStock').value = stock !== null ? String(stock) : '1';
   document.getElementById('eCity').value = ad.city || '';
   document.getElementById('eDescription').value = ad.description || ad.desc || '';
   document.getElementById('ePhone').value = ad.phone || '';
@@ -1061,11 +1137,13 @@ document.getElementById('saveEditBtn').onclick = async () => {
 
   const priceNum = document.getElementById('ePrice').value.trim();
   const currency = document.getElementById('eCurrency').value;
+  const stockVal = Math.max(0, Math.floor(Number(document.getElementById('eStock').value) || 0));
   const payload = {
     title,
     category: document.getElementById('eCategory').value,
     price: priceNum ? `${priceNum} ${currency}` : currency,
     currency,
+    stock: stockVal,
     city: document.getElementById('eCity').value.trim(),
     description: document.getElementById('eDescription').value.trim(),
     phone: document.getElementById('ePhone').value.trim(),
@@ -1133,6 +1211,8 @@ function render(items = allAds) {
     const cat = x.cat || x.category || 'Объявление';
     const desc = x.desc || x.description || '';
     const price = x.price || 'Цена договорная';
+    const stock = getAdStock(x);
+    const stockPart = stock !== null ? ` · В наличии: ${stock} шт.` : '';
     const shopTag = isShopAd(x) ? '<span class="shop-badge">🏪 МАГАЗИН</span>' : '';
     const groomTag = isGroomingAd(x) ? '<span class="groom-badge">✂️ ГРУМИНГ</span>' : '';
     return `<div class="card listing" onclick="openAdByIndex(${realIdx})">
@@ -1140,7 +1220,7 @@ function render(items = allAds) {
       <div>
         <span class="tag">${esc(cat)}</span>${shopTag}${groomTag}
         <h3>${esc(x.title)}</h3>
-        <div class="muted">${esc(x.city || 'Город не указан')} · ${esc(desc)}</div>
+        <div class="muted">${esc(x.city || 'Город не указан')}${esc(stockPart)} · ${esc(desc)}</div>
         <div class="price">${esc(price)}</div>
       </div>
     </div>`;
@@ -1174,13 +1254,13 @@ async function loadAds() {
 async function loadGroomingBookings() {
   const box = document.getElementById('groomingBookingsList');
   const tgUser = tg?.initDataUnsafe?.user;
-  const groomerId = tgUser?.id ? String(tgUser.id) : '';
-  if (!groomerId) {
-    box.innerHTML = '<div class="muted">Откройте мини-приложение в Telegram, чтобы видеть записи клиентов на груминг.</div>';
+  const userId = tgUser?.id ? String(tgUser.id) : '';
+  if (!userId) {
+    box.innerHTML = '<div class="muted">Откройте мини-приложение в Telegram, чтобы видеть записи на груминг.</div>';
     return;
   }
   try {
-    const res = await fetch(`${API_URL}/api/grooming/bookings?groomer_id=${encodeURIComponent(groomerId)}`, {
+    const res = await fetch(`${API_URL}/api/grooming/bookings?user_id=${encodeURIComponent(userId)}&groomer_id=${encodeURIComponent(userId)}`, {
       headers: authHeaders()
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1199,20 +1279,56 @@ function renderGroomingBookings() {
     box.innerHTML = '<div class="muted">Записей на груминг пока нет.</div>';
     return;
   }
+  const tgUser = tg?.initDataUnsafe?.user;
+  const myId = tgUser?.id ? String(tgUser.id) : '';
+
   box.innerHTML = groomingBookings.map((b, idx) => {
     const isConfirmed = b.status === 'confirmed';
-    const isRejected = b.status === 'rejected';
-    let statusBadge = '<span style="color:var(--yellow)">⏳ Ожидает подтверждения (не актуальна)</span>';
-    if (isConfirmed) statusBadge = '<span style="color:var(--green)">✅ Подтверждена (актуальна)</span>';
-    if (isRejected) statusBadge = '<span style="color:#ff9ea2">❌ Отклонена</span>';
+    const isRejected = b.status === 'rejected' || b.status === 'cancelled';
+    const isMaster = myId && String(b.groomer_id || '') === myId;
+    let statusBadge = '<span style="color:var(--yellow)">⏳ Ожидает подтверждения</span>';
+    if (isConfirmed) statusBadge = '<span style="color:var(--green)">✅ Подтверждена</span>';
+    if (isRejected) statusBadge = '<span style="color:#ff9ea2">❌ Отменена</span>';
+
+    const contactBtn = isMaster
+      ? `<button type="button" class="secondary small-btn" onclick="contactGroomingPeer(${idx}, 'client')">💬 Связаться с клиентом</button>`
+      : `<button type="button" class="secondary small-btn" onclick="contactGroomingPeer(${idx}, 'master')">💬 Связаться с мастером</button>`;
+
+    const confirmBtn = (!isConfirmed && !isRejected && isMaster)
+      ? `<button type="button" class="success-btn small-btn" onclick="confirmGrooming(${idx})">✅ Подтвердить запись</button>`
+      : '';
+
+    const cancelBtn = (!isRejected)
+      ? `<button type="button" class="danger-btn small-btn" onclick="cancelGrooming(${idx})">❌ Отменить запись</button>`
+      : '';
 
     return `<div class="card">
       <div><b>${esc(b.date || '')} в ${esc(b.time || '')}</b> · ${statusBadge}</div>
-      <div class="muted" style="margin-top:6px">Клиент: ${esc(b.client_name || '')} · ${esc(b.client_phone || '')}</div>
+      <div class="muted" style="margin-top:6px">Мастер: ${esc(b.groomer_name || 'Мастер')} · Клиент: ${esc(b.client_name || '')} (${esc(b.client_phone || '')})</div>
       <div class="muted">Питомец и задачи: ${esc(b.pet_and_tasks || '')}</div>
-      ${(!isConfirmed && !isRejected) ? `<div class="my-actions"><button type="button" class="success-btn small-btn" onclick="confirmGrooming(${idx})">✅ Подтвердить запись</button></div>` : ''}
+      <div class="my-actions">${confirmBtn}${cancelBtn}${contactBtn}</div>
     </div>`;
   }).join('');
+}
+
+function contactGroomingPeer(idx, peer) {
+  const b = groomingBookings[idx];
+  if (!b) return;
+  if (peer === 'client') {
+    contactPerson({
+      phone: b.client_phone || '',
+      username: b.client_username || '',
+      userId: b.client_id || '',
+      label: b.client_name || 'клиент'
+    });
+  } else {
+    contactPerson({
+      phone: b.groomer_phone || '',
+      username: b.groomer_username || '',
+      userId: b.groomer_id || '',
+      label: b.groomer_name || 'мастер'
+    });
+  }
 }
 
 async function confirmGrooming(idx) {
@@ -1236,16 +1352,45 @@ async function confirmGrooming(idx) {
   }
 }
 
+async function cancelGrooming(idx) {
+  const b = groomingBookings[idx];
+  if (!b?.id) return;
+  if (!confirm('Отменить эту запись на груминг?')) return;
+
+  const tgUser = tg?.initDataUnsafe?.user;
+  const myId = tgUser?.id ? String(tgUser.id) : '';
+  const cancelledBy = (myId && String(b.groomer_id || '') === myId) ? 'master' : 'client';
+
+  try {
+    const res = await fetch(`${API_URL}/api/grooming/bookings/${encodeURIComponent(b.id)}/cancel`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ cancelled_by: cancelledBy })
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`Ошибка отмены (${res.status}): ${result.detail || 'проверьте сервер'}`);
+      return;
+    }
+    b.status = 'rejected';
+    b.cancelled_by = cancelledBy;
+    renderGroomingBookings();
+    alert('Запись отменена, время снова свободно.');
+  } catch (err) {
+    alert(`Ошибка сети: ${err.message}`);
+  }
+}
+
 async function loadShopOrders() {
   const box = document.getElementById('shopOrdersList');
   const tgUser = tg?.initDataUnsafe?.user;
-  const shopId = tgUser?.id ? String(tgUser.id) : '';
-  if (!shopId) {
-    box.innerHTML = '<div class="muted">Откройте мини-приложение в Telegram, чтобы видеть входящие заказы магазина.</div>';
+  const userId = tgUser?.id ? String(tgUser.id) : '';
+  if (!userId) {
+    box.innerHTML = '<div class="muted">Откройте мини-приложение в Telegram, чтобы видеть заказы магазина.</div>';
     return;
   }
   try {
-    const res = await fetch(`${API_URL}/api/shop-orders?shop_id=${encodeURIComponent(shopId)}`, {
+    const res = await fetch(`${API_URL}/api/shop-orders?shop_id=${encodeURIComponent(userId)}&buyer_id=${encodeURIComponent(userId)}`, {
       headers: authHeaders()
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1261,24 +1406,44 @@ function renderShopOrders() {
   const box = document.getElementById('shopOrdersList');
   if (!box) return;
   if (!shopOrders.length) {
-    box.innerHTML = '<div class="muted">Входящих заказов пока нет.</div>';
+    box.innerHTML = '<div class="muted">Заказов пока нет.</div>';
     return;
   }
   box.innerHTML = shopOrders.map((ord, idx) => {
     const isConfirmed = ord.status === 'confirmed';
-    const isRejected = ord.status === 'rejected';
+    const isRejected = ord.status === 'rejected' || ord.status === 'cancelled';
     const itemsText = (ord.items || []).map(it => `${it.title} × ${it.qty}`).join(', ');
     let statusBadge = '<span style="color:var(--yellow)">⏳ Ожидает подтверждения</span>';
     if (isConfirmed) statusBadge = '<span style="color:var(--green)">✅ Подтверждён</span>';
-    if (isRejected) statusBadge = '<span style="color:#ff9ea2">❌ Отклонён</span>';
+    if (isRejected) statusBadge = '<span style="color:#ff9ea2">❌ Отменён</span>';
+
+    const confirmBtn = (!isConfirmed && !isRejected)
+      ? `<button type="button" class="success-btn small-btn" onclick="confirmShopOrder(${idx})">✅ Подтвердить заказ</button>`
+      : '';
+    const cancelBtn = (!isRejected)
+      ? `<button type="button" class="danger-btn small-btn" onclick="cancelShopOrder(${idx})">❌ Отменить заказ</button>`
+      : '';
+    const contactBtn = `<button type="button" class="secondary small-btn" onclick="contactOrderBuyer(${idx})">💬 Связаться с покупателем</button>`;
 
     return `<div class="card">
       <div><b>Заказ #${esc(String(ord.id || '').slice(0, 8))}</b> · ${statusBadge}</div>
       <div class="muted" style="margin-top:6px">Покупатель: ${esc(ord.buyer_name || '')} · ${esc(ord.buyer_phone || '')}</div>
       <div class="muted">Состав: ${esc(itemsText || '')} · Итого: ${esc(String(ord.total_sum ?? 0))}</div>
-      ${(!isConfirmed && !isRejected) ? `<div class="my-actions"><button type="button" class="success-btn small-btn" onclick="confirmShopOrder(${idx})">✅ Подтвердить заказ</button></div>` : ''}
+      ${ord.comment ? `<div class="muted">Комментарий: ${esc(ord.comment)}</div>` : ''}
+      <div class="my-actions">${confirmBtn}${cancelBtn}${contactBtn}</div>
     </div>`;
   }).join('');
+}
+
+function contactOrderBuyer(idx) {
+  const ord = shopOrders[idx];
+  if (!ord) return;
+  contactPerson({
+    phone: ord.buyer_phone || '',
+    username: ord.buyer_username || '',
+    userId: ord.buyer_id || '',
+    label: ord.buyer_name || 'покупатель'
+  });
 }
 
 async function confirmShopOrder(idx) {
@@ -1297,6 +1462,29 @@ async function confirmShopOrder(idx) {
     ord.status = 'confirmed';
     renderShopOrders();
     alert('Заказ подтверждён!');
+  } catch (err) {
+    alert(`Ошибка сети: ${err.message}`);
+  }
+}
+
+async function cancelShopOrder(idx) {
+  const ord = shopOrders[idx];
+  if (!ord?.id) return;
+  if (!confirm(`Отменить заказ #${String(ord.id).slice(0, 8)}?`)) return;
+  try {
+    const res = await fetch(`${API_URL}/api/orders/${encodeURIComponent(ord.id)}/cancel`, {
+      method: 'POST',
+      headers: authHeaders()
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`Ошибка отмены (${res.status}): ${result.detail || 'проверьте сервер'}`);
+      return;
+    }
+    ord.status = 'rejected';
+    renderShopOrders();
+    await loadAds();
+    alert('Заказ отменён.');
   } catch (err) {
     alert(`Ошибка сети: ${err.message}`);
   }
@@ -1347,7 +1535,7 @@ document.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => {
 
 document.getElementById('search').oninput = applyFilters;
 
-['title', 'kind', 'category', 'price', 'currency', 'city', 'description', 'phone', 'contact', 'groomDates', 'groomTimes'].forEach(id => {
+['title', 'kind', 'category', 'price', 'currency', 'stock', 'city', 'description', 'phone', 'contact', 'groomDates', 'groomTimes'].forEach(id => {
   document.getElementById(id)?.addEventListener('input', () => {
     updatePreview();
     syncProfileUI();
@@ -1379,23 +1567,18 @@ function updatePreview() {
   const shopMark = document.getElementById('isShop')?.checked ? ' [🏪 МАГАЗИН]' : '';
   const groomChecked = Boolean(document.getElementById('isGrooming')?.checked);
   const groomMark = groomChecked ? ' [✂️ ГРУМИНГ]' : '';
+  const stockNum = Math.max(0, Math.floor(Number(v('stock')) || 0));
   const slotsLine = groomChecked
-    ? `
-Слоты: ${getGroomDates({ grooming_dates: parseSlotList(v('groomDates'), []) }).join(', ')} | ${getGroomTimes({ grooming_times: parseSlotList(v('groomTimes'), []) }).join(', ')}`
+    ? `\nСлоты: ${getGroomDates({ grooming_dates: parseSlotList(v('groomDates'), []) }).join(', ')} | ${getGroomTimes({ grooming_times: parseSlotList(v('groomTimes'), []) }).join(', ')}`
     : '';
 
   document.getElementById('preview').textContent =
-    `${v('kind')}${shopMark}${groomMark}: ${v('title') || 'Название объявления'}
-` +
-    `Категория: ${v('category')}
-` +
-    `Город: ${v('city') || 'не указан'}
-` +
-    `Цена: ${v('price') ? v('price') + ' ' + v('currency') : v('currency')}` +
-    `${slotsLine}
-` +
-    `${v('description') || 'Описание'}
-` +
+    `${v('kind')}${shopMark}${groomMark}: ${v('title') || 'Название объявления'}\n` +
+    `Категория: ${v('category')}\n` +
+    `Город: ${v('city') || 'не указан'}\n` +
+    `Цена: ${v('price') ? v('price') + ' ' + v('currency') : v('currency')}\n` +
+    `В наличии: ${stockNum} шт.${slotsLine}\n` +
+    `${v('description') || 'Описание'}\n` +
     `Связь: ${v('contact')} ${v('phone')}`;
 }
 
@@ -1547,6 +1730,7 @@ document.getElementById('publish').onclick = async () => {
   const tgUser = tg?.initDataUnsafe?.user;
   const priceRaw = document.getElementById('price').value.trim();
   const currency = document.getElementById('currency').value;
+  const stockVal = Math.max(0, Math.floor(Number(document.getElementById('stock')?.value) || 0));
   const phoneVal = document.getElementById('phone').value.trim() || profileState.phone;
   const channelsStr = profileState.channels.join(', ');
   const isShop = Boolean(document.getElementById('isShop')?.checked);
@@ -1563,6 +1747,7 @@ document.getElementById('publish').onclick = async () => {
   if (profileState.role) extraParts.push(`Режим: ${profileState.role}`);
   if (profileState.name) extraParts.push(`Имя: ${profileState.name}`);
   if (channelsStr) extraParts.push(`Связь: ${channelsStr}`);
+  if (stockVal > 0) extraParts.push(`В наличии: ${stockVal} шт.`);
   if (isGrooming) {
     extraParts.push(`Даты: ${groomingDates.join(', ')}`);
     extraParts.push(`Время: ${groomingTimes.join(', ')}`);
@@ -1579,6 +1764,7 @@ document.getElementById('publish').onclick = async () => {
     category: document.getElementById('category').value,
     price: priceRaw || currency,
     currency,
+    stock: stockVal,
     city: document.getElementById('city').value.trim(),
     description: fullDesc,
     phone: phoneVal,
@@ -1623,14 +1809,18 @@ function showMy() {
   const el = document.getElementById('mylist');
   el.className = userAds.length ? '' : 'empty';
   el.innerHTML = userAds.length
-    ? userAds.map((a, idx) => `<div class="card my-card" onclick="openMyAdByIndex(${idx})">
-        <b>${esc(a.title)}</b> ${isShopAd(a) ? '<span class="shop-badge">🏪 МАГАЗИН</span>' : ''} ${isGroomingAd(a) ? '<span class="groom-badge">✂️ ГРУМИНГ</span>' : ''}
-        <p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.price || '')} · ${esc(a.status || 'approved')}</p>
-        <div class="my-actions" onclick="event.stopPropagation()">
-          <button class="secondary small-btn" onclick="openEditModal(${idx})">✏️ Редактировать</button>
-          <button class="danger-btn small-btn" onclick="deleteAd(${idx})">🗑 Удалить</button>
-        </div>
-      </div>`).join('')
+    ? userAds.map((a, idx) => {
+        const stock = getAdStock(a);
+        const stockLine = stock !== null ? ` · В наличии: ${stock} шт.` : '';
+        return `<div class="card my-card" onclick="openMyAdByIndex(${idx})">
+          <b>${esc(a.title)}</b> ${isShopAd(a) ? '<span class="shop-badge">🏪 МАГАЗИН</span>' : ''} ${isGroomingAd(a) ? '<span class="groom-badge">✂️ ГРУМИНГ</span>' : ''}
+          <p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.price || '')}${esc(stockLine)} · ${esc(a.status || 'approved')}</p>
+          <div class="my-actions" onclick="event.stopPropagation()">
+            <button class="secondary small-btn" onclick="openEditModal(${idx})">✏️ Редактировать</button>
+            <button class="danger-btn small-btn" onclick="deleteAd(${idx})">🗑 Удалить</button>
+          </div>
+        </div>`;
+      }).join('')
     : 'Пока нет объявлений.<strong>Создайте первое!</strong>';
 }
 
