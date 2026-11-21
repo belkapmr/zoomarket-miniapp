@@ -2,7 +2,7 @@ import hashlib
 import hmac
 import json
 import os
-from typing import Optional
+from typing import List, Optional
 from urllib.parse import parse_qsl
 
 import firebase_admin
@@ -11,9 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from firebase_admin import credentials, firestore
 from pydantic import BaseModel
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "9022361491:AAEz6y0zvihhwkcZQOhm-1UXS_Q91Hmufzc")
 FIREBASE_CREDENTIALS_JSON = os.environ.get("FIREBASE_CREDENTIALS_JSON", "").strip()
-FIREBASE_CRED_PATH = os.environ.get("FIREBASE_CRED_PATH", "serviceAccountKey.json")
+FIREBASE_CRED_PATH = os.environ.get(
+    "FIREBASE_CRED_PATH", "zoomarket-121d2-firebase-adminsdk-fbsvc-ac9a0145b5.json"
+)
 
 if not BOT_TOKEN:
     raise RuntimeError("Не задана переменная окружения BOT_TOKEN")
@@ -70,6 +72,7 @@ class AdCreate(BaseModel):
     description: str = ""
     phone: str = ""
     contact: str = "Telegram"
+    photos: List[str] = []
 
 
 class AdUpdate(BaseModel):
@@ -82,6 +85,7 @@ class AdUpdate(BaseModel):
     description: Optional[str] = None
     phone: Optional[str] = None
     contact: Optional[str] = None
+    photos: Optional[List[str]] = None
 
 
 @app.get("/")
@@ -128,6 +132,7 @@ def create_ad(ad: AdCreate, x_telegram_init_data: str = Header(default="")):
         "description": ad.description.strip(),
         "phone": ad.phone.strip(),
         "contact": ad.contact,
+        "photos": (ad.photos or [])[:3],
         "status": "approved",
         "author_id": tg_user.get("id"),
         "author_name": " ".join(
@@ -175,6 +180,8 @@ def update_ad(
         updates["phone"] = payload.phone.strip()
     if payload.contact is not None:
         updates["contact"] = payload.contact
+    if payload.photos is not None:
+        updates["photos"] = payload.photos[:3]
     if payload.price is not None:
         p = payload.price.strip()
         curr = (payload.currency or data.get("currency") or "").strip()
