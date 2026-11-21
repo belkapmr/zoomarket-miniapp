@@ -28,23 +28,29 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 .modal-btns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 .modal-btns>*{flex:1}
 
-/* Блоки Я СЕЙЧАС, МОИ ДАННЫЕ, ТАК ВЫГЛЯДИТ МОЁ ОБЪЯВЛЕНИЕ */
-.zm-extra-wrap{display:flex;flex-direction:column;gap:10px;margin:14px 0 14px;color:var(--white)}
-.zm-block-title{font-size:13px;color:var(--muted);font-weight:800;letter-spacing:1px;margin-top:10px}
+/* Стили блока внутри Профиля */
+.zm-profile-wrap{display:flex;flex-direction:column;gap:10px;margin-top:8px;color:var(--white)}
+.zm-block-title{font-size:13px;color:var(--muted);font-weight:800;letter-spacing:1px;margin-top:12px}
 .zm-block-hint{font-size:12px;color:var(--muted);margin-top:-4px}
-.zm-mode-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.zm-mode-btn{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px 13px;border-radius:16px;border:1px solid var(--line);background:var(--panel);color:var(--white);text-align:left;font-size:14px;font-weight:700}
-.zm-mode-btn.is-active{border-color:var(--yellow);background:var(--panel2)}
-.zm-mode-sub{font-size:11px;font-weight:500;color:var(--muted)}
-.zm-channels-label{font-size:12px;color:var(--muted);font-weight:700;margin-top:2px}
+.zm-role-stack{display:flex;flex-direction:column;gap:8px}
+.zm-role-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-radius:18px;border:1px solid var(--line);background:var(--panel);color:var(--white);text-align:left;width:100%}
+.zm-role-card.is-active{border-color:var(--yellow);background:var(--panel2)}
+.zm-role-left{display:flex;align-items:center;gap:12px}
+.zm-role-icon{font-size:24px;width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.06);display:grid;place-items:center}
+.zm-role-title{font-size:15px;font-weight:800;display:block}
+.zm-role-sub{font-size:12px;color:var(--muted);display:block;margin-top:2px}
+.zm-role-check{color:var(--green);font-size:18px;font-weight:900;opacity:0}
+.zm-role-card.is-active .zm-role-check{opacity:1}
+.zm-channels-label{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.6px;margin-top:4px}
 .zm-channels-row{display:flex;gap:8px;flex-wrap:wrap}
-.zm-channel-btn{padding:9px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:#bdc9d8;font-size:13px;font-weight:700}
+.zm-channel-btn{padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:#bdc9d8;font-size:14px;font-weight:700}
 .zm-channel-btn.is-selected{background:var(--yellow);border-color:var(--yellow);color:#111}
 .zm-preview-card{border:1px dashed #45617f;border-radius:20px;padding:15px;background:var(--panel);display:flex;flex-direction:column;gap:6px}
-.zm-preview-top{font-size:11px;font-weight:800;color:var(--yellow);letter-spacing:.4px}
+.zm-preview-top{font-size:12px;font-weight:800;color:var(--yellow)}
 .zm-preview-title{font-size:16px;font-weight:800;color:var(--white)}
 .zm-preview-meta{font-size:13px;color:var(--muted)}
 .zm-preview-contact{font-size:13px;color:var(--white)}
+.zm-saved-note{font-size:12px;color:var(--green);min-height:16px}
 </style></head>
 <body>
 <header><div class="brand"><div class="logo">🐾</div><div><h1>ЗооМаркет</h1><p>Животные · товары · услуги</p></div></div></header>
@@ -73,56 +79,77 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <div class="field"><label>Как связаться?</label><select id="contact"><option>Telegram</option><option>Viber</option><option>WhatsApp</option><option>Телефон</option></select></div>
 <div class="photoadd">📷 Добавить фотографии (до 3)<input id="photos" type="file" accept="image/*" multiple style="display:block;margin:12px auto 0;max-width:100%"><div class="thumbs" id="photoThumbs"></div></div>
 <div class="sectiontitle">ПРЕДПРОСМОТР</div><div class="preview" id="preview">Заполните название и описание — здесь появится ваш текст.</div>
-
-<div id="zm-ad-extra-block" class="zm-extra-wrap">
-  <div class="zm-block-title">Я СЕЙЧАС</div>
-  <div class="zm-mode-row">
-    <button type="button" class="zm-mode-btn is-active" data-mode="ИЩУ / ПОКУПАЮ">
-      <span>🐾 Ищу / Покупаю</span>
-      <span class="zm-mode-sub">питомца, корм или услугу</span>
-    </button>
-    <button type="button" class="zm-mode-btn" data-mode="ПРЕДЛАГАЮ / ПРОДАЮ">
-      <span>📣 Предлагаю / Продаю</span>
-      <span class="zm-mode-sub">животное, товар или уход</span>
-    </button>
-  </div>
-
-  <div class="zm-block-title">МОИ ДАННЫЕ</div>
-  <div class="zm-block-hint">Заполните один раз — при публикации подставится автоматически</div>
-
-  <div class="field">
-    <label for="zmContactName">Имя</label>
-    <input id="zmContactName" type="text" placeholder="Ваше имя">
-  </div>
-
-  <div class="field">
-    <label for="zmContactPhone">Телефон</label>
-    <input id="zmContactPhone" type="tel" placeholder="0 6xx xx xxx">
-  </div>
-
-  <div class="zm-channels-label">ГДЕ СО МНОЙ СВЯЗАТЬСЯ</div>
-  <div class="zm-channels-row">
-    <button type="button" class="zm-channel-btn is-selected" data-channel="Telegram">Telegram</button>
-    <button type="button" class="zm-channel-btn" data-channel="Viber">Viber</button>
-    <button type="button" class="zm-channel-btn" data-channel="WhatsApp">WhatsApp</button>
-  </div>
-
-  <div class="zm-block-title">ТАК ВЫГЛЯДИТ МОЁ ОБЪЯВЛЕНИЕ</div>
-  <div id="zmAdPreviewBox" class="zm-preview-card">
-    <div class="zm-preview-top"><span id="zmPrevMode">🐾 ИЩУ / ПОКУПАЮ</span></div>
-    <div id="zmPrevTitle" class="zm-preview-title">Название объявления</div>
-    <div id="zmPrevMeta" class="zm-preview-meta">Категория · Цена по договорённости</div>
-    <div id="zmPrevContact" class="zm-preview-contact">Имя не указано · Телефон не указан (Telegram)</div>
-  </div>
-
-  <button type="button" id="zmPublishAdBtn" class="primary">🚀 Разместить объявление</button>
-</div>
-
 <button class="primary" id="publish">📣 Опубликовать</button><p class="notice">Объявления сохраняются на сервере и публикуются в общей ленте.</p>
 </section>
 <section id="my" class="hidden"><h2>Мои объявления</h2><div id="mylist" class="empty">Пока нет объявлений.<strong>Создайте первое!</strong></div></section>
 <section id="saved" class="hidden"><h2>Избранное</h2><div id="savedlist" class="empty">❤️ Здесь будут сохранённые объявления.</div></section>
-<section id="profile" class="hidden"><h2>Профиль</h2><div class="card"><b id="username">Пользователь Telegram</b><p class="muted">Ваши контакты и объявления будут доступны здесь.</p></div><div class="card">🐾 ЗооМаркет — мгновенная публикация объявлений.</div></section>
+
+<section id="profile" class="hidden">
+  <h2>Профиль</h2>
+  <div class="card">
+    <b id="username">Пользователь Telegram</b>
+    <p class="muted" style="margin:4px 0 0">🐾 ЗооМаркет — мгновенная публикация объявлений.</p>
+  </div>
+
+  <div class="zm-profile-wrap">
+    <div class="zm-block-title">Я СЕЙЧАС</div>
+    <div class="zm-role-stack">
+      <button type="button" class="zm-role-card is-active" data-role="ИЩУ / ПОКУПАЮ">
+        <div class="zm-role-left">
+          <div class="zm-role-icon">🐾</div>
+          <div>
+            <span class="zm-role-title">Покупатель / Ищу</span>
+            <span class="zm-role-sub">ищу питомца, корм или услугу</span>
+          </div>
+        </div>
+        <span class="zm-role-check">✓</span>
+      </button>
+      <button type="button" class="zm-role-card" data-role="ПРЕДЛАГАЮ / ПРОДАЮ">
+        <div class="zm-role-left">
+          <div class="zm-role-icon">📣</div>
+          <div>
+            <span class="zm-role-title">Продавец / Мастер</span>
+            <span class="zm-role-sub">размещаю животных, товары или услуги</span>
+          </div>
+        </div>
+        <span class="zm-role-check">✓</span>
+      </button>
+    </div>
+
+    <div class="zm-block-title">МОИ ДАННЫЕ ДЛЯ ОБЪЯВЛЕНИЙ</div>
+    <div class="zm-block-hint">Заполните один раз — при «Разместить» всё подставится само</div>
+
+    <div class="field">
+      <label for="zmProfileName">Имя</label>
+      <input id="zmProfileName" type="text" placeholder="Ваше имя">
+    </div>
+
+    <div class="field">
+      <label for="zmProfilePhone">Телефон</label>
+      <input id="zmProfilePhone" type="tel" placeholder="0 6xx xx xxx">
+    </div>
+
+    <div class="zm-channels-label">ГДЕ СО МНОЙ СВЯЗАТЬСЯ</div>
+    <div class="zm-channels-row">
+      <button type="button" class="zm-channel-btn" data-channel="Viber">💜 Viber</button>
+      <button type="button" class="zm-channel-btn" data-channel="WhatsApp">💚 WhatsApp</button>
+      <button type="button" class="zm-channel-btn is-selected" data-channel="Telegram">✈️ Telegram</button>
+    </div>
+
+    <button type="button" id="zmSaveProfileBtn" class="primary">💾 Сохранить данные</button>
+    <div class="zm-saved-note" id="zmSavedNote"></div>
+
+    <div class="zm-block-title">ТАК ВЫГЛЯДИТ МОЁ ОБЪЯВЛЕНИЕ</div>
+    <div class="zm-preview-card">
+      <div class="zm-preview-top" id="zmPrevRole">🐾 ИЩУ / ПОКУПАЮ</div>
+      <div class="zm-preview-title" id="zmPrevTitle">Название объявления</div>
+      <div class="zm-preview-meta" id="zmPrevMeta">Категория · Цена по договорённости</div>
+      <div class="zm-preview-contact" id="zmPrevContact">Имя не указано · Телефон не указан (Telegram)</div>
+    </div>
+
+    <button type="button" id="zmGoCreateBtn" class="primary">🚀 Разместить объявление</button>
+  </div>
+</section>
 </main>
 
 <!-- МОДАЛЬНОЕ ОКНО ПРОСМОТРА -->
@@ -499,6 +526,7 @@ function page(p) {
   document.querySelectorAll('.nav').forEach(b => b.classList.toggle('active', b.dataset.page === p));
   if (p === 'home') loadAds();
   if (p === 'my') loadMyAds();
+  if (p === 'profile') syncProfileUI();
 }
 
 document.querySelectorAll('.nav').forEach(b => b.onclick = () => page(b.dataset.page));
@@ -521,11 +549,11 @@ document.getElementById('search').oninput = applyFilters;
 ['title', 'kind', 'category', 'price', 'currency', 'city', 'description', 'phone', 'contact'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     updatePreview();
-    syncExtraPreview();
+    syncProfileUI();
   });
   document.getElementById(id).addEventListener('change', () => {
     updatePreview();
-    syncExtraPreview();
+    syncProfileUI();
   });
 });
 
@@ -540,119 +568,145 @@ function updatePreview() {
     `Связь: ${v('contact')} ${v('phone')}`;
 }
 
-/* Логика блоков Я СЕЙЧАС, МОИ ДАННЫЕ и ТАК ВЫГЛЯДИТ МОЁ ОБЪЯВЛЕНИЕ */
-const ZM_STORAGE_KEY = "zoomarket_my_contact_data_v1";
-const zmModeButtons = document.querySelectorAll(".zm-mode-btn");
-const zmChannelButtons = document.querySelectorAll(".zm-channel-btn");
-const zmNameInput = document.getElementById("zmContactName");
-const zmPhoneInput = document.getElementById("zmContactPhone");
-const zmPrevMode = document.getElementById("zmPrevMode");
+/* Профиль: Я СЕЙЧАС, МОИ ДАННЫЕ, Сохранить данные, ТАК ВЫГЛЯДИТ МОЁ ОБЪЯВЛЕНИЕ */
+const ZM_PROFILE_KEY = "zoomarket_profile_v1";
+const zmRoleCards = document.querySelectorAll(".zm-role-card");
+const zmChannelBtns = document.querySelectorAll(".zm-channel-btn");
+const zmProfileName = document.getElementById("zmProfileName");
+const zmProfilePhone = document.getElementById("zmProfilePhone");
+const zmSaveProfileBtn = document.getElementById("zmSaveProfileBtn");
+const zmSavedNote = document.getElementById("zmSavedNote");
+const zmPrevRole = document.getElementById("zmPrevRole");
 const zmPrevTitle = document.getElementById("zmPrevTitle");
 const zmPrevMeta = document.getElementById("zmPrevMeta");
 const zmPrevContact = document.getElementById("zmPrevContact");
-const zmPublishAdBtn = document.getElementById("zmPublishAdBtn");
+const zmGoCreateBtn = document.getElementById("zmGoCreateBtn");
 
-let zmState = {
-  mode: "ИЩУ / ПОКУПАЮ",
+let profileState = {
+  role: "ИЩУ / ПОКУПАЮ",
   name: "",
   phone: "",
   channels: ["Telegram"]
 };
 
-function loadZmData() {
+function loadProfileState() {
   try {
-    const raw = localStorage.getItem(ZM_STORAGE_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    zmState = {
-      mode: parsed.mode || "ИЩУ / ПОКУПАЮ",
-      name: parsed.name || "",
-      phone: parsed.phone || "",
-      channels: Array.isArray(parsed.channels) && parsed.channels.length ? parsed.channels : ["Telegram"]
-    };
+    const raw = localStorage.getItem(ZM_PROFILE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      profileState = {
+        role: parsed.role || "ИЩУ / ПОКУПАЮ",
+        name: parsed.name || "",
+        phone: parsed.phone || "",
+        channels: Array.isArray(parsed.channels) && parsed.channels.length ? parsed.channels : ["Telegram"]
+      };
+    }
   } catch (_) {}
 }
 
-function saveZmData() {
-  zmState.name = (zmNameInput?.value || "").trim();
-  zmState.phone = (zmPhoneInput?.value || "").trim();
-  try {
-    localStorage.setItem(ZM_STORAGE_KEY, JSON.stringify(zmState));
-  } catch (_) {}
+function applyProfileToCreateForm() {
+  const phoneEl = document.getElementById("phone");
+  const contactEl = document.getElementById("contact");
+  const kindEl = document.getElementById("kind");
+
+  if (phoneEl && profileState.phone) {
+    phoneEl.value = profileState.phone;
+  }
+  if (contactEl && profileState.channels[0]) {
+    contactEl.value = profileState.channels[0];
+  }
+  if (kindEl) {
+    kindEl.value = profileState.role === "ИЩУ / ПОКУПАЮ" ? "Ищу" : "Животное";
+  }
+  updatePreview();
 }
 
-function syncExtraPreview() {
-  zmModeButtons.forEach(btn => btn.classList.toggle("is-active", btn.dataset.mode === zmState.mode));
-  zmChannelButtons.forEach(btn => btn.classList.toggle("is-selected", zmState.channels.includes(btn.dataset.channel)));
+function saveProfileState(showFeedback = false) {
+  profileState.name = (zmProfileName?.value || "").trim();
+  profileState.phone = (zmProfilePhone?.value || "").trim();
+  try {
+    localStorage.setItem(ZM_PROFILE_KEY, JSON.stringify(profileState));
+  } catch (_) {}
+  applyProfileToCreateForm();
+  if (showFeedback && zmSavedNote) {
+    zmSavedNote.textContent = "✓ Данные сохранены и подставятся в форму размещения";
+    setTimeout(() => {
+      if (zmSavedNote) zmSavedNote.textContent = "";
+    }, 3000);
+  }
+}
 
-  if (zmNameInput && zmNameInput.value !== zmState.name) zmNameInput.value = zmState.name;
-  if (zmPhoneInput && zmPhoneInput.value !== zmState.phone) zmPhoneInput.value = zmState.phone;
+function syncProfileUI() {
+  zmRoleCards.forEach(btn => btn.classList.toggle("is-active", btn.dataset.role === profileState.role));
+  zmChannelBtns.forEach(btn => btn.classList.toggle("is-selected", profileState.channels.includes(btn.dataset.channel)));
 
-  const phoneField = document.getElementById("phone");
-  if (phoneField && zmState.phone && !phoneField.value.trim()) {
-    phoneField.value = zmState.phone;
+  if (zmProfileName && zmProfileName.value !== profileState.name) {
+    zmProfileName.value = profileState.name;
+  }
+  if (zmProfilePhone && zmProfilePhone.value !== profileState.phone) {
+    zmProfilePhone.value = profileState.phone;
   }
 
   const titleText = (document.getElementById("title")?.value || "").trim() || "Название объявления";
-  const categoryText = (document.getElementById("category")?.value || "").trim() || "Объявление";
+  const categoryText = (document.getElementById("category")?.value || "").trim() || "Животные и зоотовары";
   const priceRaw = (document.getElementById("price")?.value || "").trim();
   const currency = document.getElementById("currency")?.value || "";
   const priceText = priceRaw ? `${priceRaw} ${currency}`.trim() : (currency || "Цена по договорённости");
 
-  const contactName = zmState.name || "Имя не указано";
-  const contactPhone = zmState.phone || (phoneField?.value || "").trim() || "Телефон не указан";
-  const channelsText = zmState.channels.length ? ` (${zmState.channels.join(", ")})` : "";
+  const nameText = profileState.name || "Имя не указано";
+  const phoneText = profileState.phone || "Телефон не указан";
+  const channelsText = profileState.channels.length ? ` (${profileState.channels.join(", ")})` : "";
 
-  if (zmPrevMode) zmPrevMode.textContent = zmState.mode;
+  if (zmPrevRole) zmPrevRole.textContent = `🐾 ${profileState.role}`;
   if (zmPrevTitle) zmPrevTitle.textContent = titleText;
   if (zmPrevMeta) zmPrevMeta.textContent = `${categoryText} · ${priceText}`;
-  if (zmPrevContact) zmPrevContact.textContent = `${contactName} · ${contactPhone}${channelsText}`;
+  if (zmPrevContact) zmPrevContact.textContent = `${nameText} · ${phoneText}${channelsText}`;
 }
 
-zmModeButtons.forEach(btn => {
+zmRoleCards.forEach(btn => {
   btn.addEventListener("click", () => {
-    zmState.mode = btn.dataset.mode;
-    saveZmData();
-    syncExtraPreview();
+    profileState.role = btn.dataset.role;
+    saveProfileState(false);
+    syncProfileUI();
   });
 });
 
-zmChannelButtons.forEach(btn => {
+zmChannelBtns.forEach(btn => {
   btn.addEventListener("click", () => {
     const ch = btn.dataset.channel;
-    if (zmState.channels.includes(ch)) {
-      if (zmState.channels.length > 1) {
-        zmState.channels = zmState.channels.filter(item => item !== ch);
+    if (profileState.channels.includes(ch)) {
+      if (profileState.channels.length > 1) {
+        profileState.channels = profileState.channels.filter(item => item !== ch);
       }
     } else {
-      zmState.channels.push(ch);
+      profileState.channels.push(ch);
     }
-    const contactSelect = document.getElementById("contact");
-    if (contactSelect && zmState.channels[0]) {
-      contactSelect.value = zmState.channels[0];
-    }
-    saveZmData();
-    syncExtraPreview();
+    saveProfileState(false);
+    syncProfileUI();
   });
 });
 
-[zmNameInput, zmPhoneInput].forEach(el => {
+[zmProfileName, zmProfilePhone].forEach(el => {
   if (!el) return;
   el.addEventListener("input", () => {
-    saveZmData();
-    if (el === zmPhoneInput) {
-      const phoneField = document.getElementById("phone");
-      if (phoneField) {
-        phoneField.value = zmState.phone;
-        updatePreview();
-      }
-    }
-    syncExtraPreview();
+    saveProfileState(false);
+    syncProfileUI();
   });
+});
+
+zmSaveProfileBtn?.addEventListener("click", () => {
+  saveProfileState(true);
+  syncProfileUI();
+});
+
+zmGoCreateBtn?.addEventListener("click", () => {
+  saveProfileState(false);
+  applyProfileToCreateForm();
+  page("create");
 });
 
 document.getElementById('publish').onclick = async () => {
-  saveZmData();
+  saveProfileState(false);
   const title = document.getElementById('title').value.trim();
   if (!title) {
     alert('Введите название объявления');
@@ -661,12 +715,12 @@ document.getElementById('publish').onclick = async () => {
 
   const priceRaw = document.getElementById('price').value.trim();
   const currency = document.getElementById('currency').value;
-  const phoneVal = document.getElementById('phone').value.trim() || zmState.phone;
-  const channelsStr = zmState.channels.join(', ');
+  const phoneVal = document.getElementById('phone').value.trim() || profileState.phone;
+  const channelsStr = profileState.channels.join(', ');
   const baseDesc = document.getElementById('description').value.trim();
   const extraParts = [];
-  if (zmState.mode) extraParts.push(`Режим: ${zmState.mode}`);
-  if (zmState.name) extraParts.push(`Имя: ${zmState.name}`);
+  if (profileState.role) extraParts.push(`Режим: ${profileState.role}`);
+  if (profileState.name) extraParts.push(`Имя: ${profileState.name}`);
   if (channelsStr) extraParts.push(`Связь: ${channelsStr}`);
   const fullDesc = [baseDesc, ...extraParts].filter(Boolean).join(' · ');
 
@@ -707,10 +761,6 @@ document.getElementById('publish').onclick = async () => {
   }
 };
 
-zmPublishAdBtn?.addEventListener("click", () => {
-  document.getElementById("publish").click();
-});
-
 function showMy() {
   const el = document.getElementById('mylist');
   el.className = userAds.length ? '' : 'empty';
@@ -727,16 +777,15 @@ function showMy() {
 }
 
 const u = tg?.initDataUnsafe?.user;
+loadProfileState();
 if (u) {
   document.getElementById('username').textContent = [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Пользователь Telegram';
-  loadZmData();
-  if (!zmState.name) {
-    zmState.name = [u.first_name, u.last_name].filter(Boolean).join(' ') || '';
+  if (!profileState.name) {
+    profileState.name = [u.first_name, u.last_name].filter(Boolean).join(' ') || '';
   }
-} else {
-  loadZmData();
 }
 
-syncExtraPreview();
+applyProfileToCreateForm();
+syncProfileUI();
 loadAds();
 </script></body></html>
