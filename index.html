@@ -5,14 +5,14 @@
 <title>ЗооМаркет</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--bg:#08111f;--panel:#132238;--panel2:#1b304a;--line:#223b5a;--muted:#9aacc0;--yellow:#ffc900;--green:#36d98a;--purple:#6d52bb;--white:#f4f7fb}
+:root{--bg:#08111f;--panel:#132238;--panel2:#1b304a;--line:#223b5a;--muted:#9aacc0;--yellow:#ffc900;--green:#36d98a;--purple:#6d52bb;--danger:#e5484d;--white:#f4f7fb}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:88px}
 header{padding:18px 18px 10px;position:sticky;top:0;background:rgba(8,17,31,.96);z-index:5;border-bottom:1px solid #172b43}
 .brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:15px;background:var(--yellow);display:grid;place-items:center;font-size:27px}.brand h1{font-size:21px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
 main{padding:16px}.tabs{display:flex;gap:8px;overflow:auto;margin:8px 0 16px}.chip{border:1px solid var(--line);background:var(--panel);color:#bdc9d8;padding:10px 15px;border-radius:24px;white-space:nowrap;font-weight:600}.chip.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
 .searchbox,.card,.field,.preview{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:15px;margin-bottom:13px}.searchbox input{background:none;border:0;color:white;font-size:16px;width:100%;outline:0}.sectiontitle{font-size:13px;color:var(--muted);font-weight:800;letter-spacing:1px;margin:22px 0 12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center;cursor:pointer}.category .emoji{font-size:30px}.category b{display:block;margin-top:7px}.listing{display:flex;gap:12px;cursor:pointer;transition:transform .12s ease,border-color .12s ease}.listing:active{transform:scale(.99);border-color:var(--yellow)}.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover;display:block}.listing h3{font-size:16px;margin:2px 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.price{color:var(--yellow);font-weight:800;margin-top:8px}.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px}
-button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:var(--yellow);color:#111;width:100%}.secondary{background:var(--panel2);color:white;border:1px solid var(--line)}.purple{background:#302650;color:#d5c8ff;border:1px solid #4b3b79}.small-btn{padding:9px 13px;font-size:13px;border-radius:12px;margin-top:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center;cursor:pointer}.category .emoji{font-size:30px}.category b{display:block;margin-top:7px}.listing{display:flex;gap:12px;cursor:pointer;transition:transform .12s ease,border-color .12s ease}.listing:active{transform:scale(.99);border-color:var(--yellow)}.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover;display:block}.listing>div:last-child{min-width:0;flex:1}.listing h3{font-size:16px;margin:2px 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.price{color:var(--yellow);font-weight:800;margin-top:8px}.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px}
+button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:var(--yellow);color:#111;width:100%}.secondary{background:var(--panel2);color:white;border:1px solid var(--line)}.danger-btn{background:#3a171c;color:#ff9ea2;border:1px solid #6b252e}.small-btn{padding:9px 12px;font-size:13px;border-radius:12px}.my-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .field label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}.field input,.field textarea,.field select{width:100%;background:transparent;border:0;outline:0;color:white;font:16px inherit}.field textarea{min-height:90px;resize:vertical}.field select option{background:var(--panel)}
 .row{display:flex;gap:10px}.row>*{flex:1}.bottom{position:fixed;bottom:0;left:0;right:0;background:#0b1728;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:10}.nav{background:none;color:var(--muted);padding:5px 4px;font-size:11px;flex:1}.nav span{display:block;font-size:23px;margin-bottom:3px}.nav.active{color:var(--yellow)}
 .hidden{display:none!important}.empty{text-align:center;padding:45px 15px;color:var(--muted)}.empty strong{display:block;color:white;font-size:19px;margin:10px}.preview{border-style:dashed}.preview pre{white-space:pre-wrap;color:#c5d0de;font:14px/1.5 inherit;margin:8px 0}
@@ -21,7 +21,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center;z-index:30}
 .modal-bg.open{display:flex}
 .modal-box{width:100%;max-width:640px;max-height:88vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px 24px 0 0;padding:20px 18px 28px}
-.modal-photos{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}.modal-photos img{width:140px;height:140px;object-fit:cover;border-radius:14px;flex-shrink:0}
+.modal-photos{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}.modal-photos img{width:150px;height:150px;object-fit:cover;border-radius:14px;flex-shrink:0}
 .modal-title{margin:6px 0 8px;font-size:20px}
 .modal-price{color:var(--yellow);font-size:18px;font-weight:800;margin-bottom:12px}
 .modal-line{margin-bottom:10px;line-height:1.5;font-size:15px}
@@ -131,6 +131,14 @@ function esc(s) {
   }[c]));
 }
 
+function safeImgSrc(src) {
+  if (!src || typeof src !== 'string') return '';
+  if (src.startsWith('data:image/') || src.startsWith('https://') || src.startsWith('http://')) {
+    return src;
+  }
+  return '';
+}
+
 function authHeaders() {
   const headers = { 'Content-Type': 'application/json' };
   if (tg?.initData) {
@@ -163,7 +171,11 @@ function compressImage(file, maxWidth = 800, quality = 0.7) {
 
 function renderThumbs() {
   const box = document.getElementById('photoThumbs');
-  box.innerHTML = selectedPhotos.map(src => `<img src="${esc(src)}" alt="">`).join('');
+  box.innerHTML = selectedPhotos
+    .map(safeImgSrc)
+    .filter(Boolean)
+    .map(src => `<img src="${esc(src)}" alt="">`)
+    .join('');
 }
 
 document.getElementById('photos').addEventListener('change', async (e) => {
@@ -181,7 +193,13 @@ document.getElementById('photos').addEventListener('change', async (e) => {
 });
 
 function getAdPhotos(ad) {
-  if (Array.isArray(ad?.photos) && ad.photos.length) return ad.photos;
+  if (Array.isArray(ad?.photos) && ad.photos.length) {
+    return ad.photos.map(safeImgSrc).filter(Boolean);
+  }
+  if (typeof ad?.photo === 'string') {
+    const p = safeImgSrc(ad.photo);
+    return p ? [p] : [];
+  }
   return [];
 }
 
@@ -309,6 +327,34 @@ document.getElementById('saveEditBtn').onclick = async () => {
   alert('Объявление обновлено!');
 };
 
+async function deleteAd(idx) {
+  const ad = userAds[idx];
+  if (!ad) return;
+  if (!confirm(`Удалить объявление «${ad.title || 'Без названия'}»?`)) return;
+
+  if (ad.id) {
+    try {
+      const res = await fetch(`${API_URL}/api/ads/${encodeURIComponent(ad.id)}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(`Ошибка удаления (${res.status}): ${result.detail || 'проверьте сервер'}`);
+        return;
+      }
+    } catch (err) {
+      alert(`Ошибка сети: ${err.message}`);
+      return;
+    }
+  }
+
+  userAds.splice(idx, 1);
+  showMy();
+  await loadAds();
+  alert('Объявление удалено.');
+}
+
 function render(items = allAds) {
   document.getElementById('listings').innerHTML = items.map(x => {
     const realIdx = allAds.indexOf(x);
@@ -362,10 +408,7 @@ async function loadMyAds() {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    const fetched = Array.isArray(data) ? data : (data.items || []);
-    if (fetched.length) {
-      userAds = fetched;
-    }
+    userAds = Array.isArray(data) ? data : (data.items || []);
   } catch (err) {
     console.error(err);
   }
@@ -464,7 +507,10 @@ function showMy() {
     ? userAds.map((a, idx) => `<div class="card">
         <b>${esc(a.title)}</b>
         <p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.price || '')} · ${esc(a.status || 'approved')}</p>
-        <button class="secondary small-btn" onclick="openEditModal(${idx})">✏️ Редактировать</button>
+        <div class="my-actions">
+          <button class="secondary small-btn" onclick="openEditModal(${idx})">✏️ Редактировать</button>
+          <button class="danger-btn small-btn" onclick="deleteAd(${idx})">🗑 Удалить</button>
+        </div>
       </div>`).join('')
     : 'Пока нет объявлений.<strong>Создайте первое!</strong>';
 }
