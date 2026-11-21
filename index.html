@@ -28,6 +28,10 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 .modal-btns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 .modal-btns>*{flex:1}
 
+.seller-box{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:12px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.seller-box b{display:block;font-size:15px}
+.seller-box span{font-size:12px;color:var(--yellow);font-weight:700}
+
 /* Стили блока внутри Профиля */
 .zm-profile-wrap{display:flex;flex-direction:column;gap:10px;margin-top:8px;color:var(--white)}
 .zm-block-title{font-size:13px;color:var(--muted);font-weight:800;letter-spacing:1px;margin-top:12px}
@@ -162,11 +166,57 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
     <div class="modal-line" id="mCity"></div>
     <div class="modal-line" id="mDesc"></div>
     <div class="modal-line" id="mContact"></div>
+
+    <div class="seller-box">
+      <div>
+        <b id="mSellerName">Продавец</b>
+        <span id="mSellerRating">★ Профиль и отзывы продавца</span>
+      </div>
+      <button type="button" class="secondary small-btn" id="mOpenSeller">👤 Профиль продавца</button>
+    </div>
+
     <div class="modal-btns">
       <button class="secondary" id="mCopy">📋 Контакт</button>
       <button class="secondary hidden" id="mEdit">✏️ Изменить</button>
       <button class="primary" onclick="closeAdModal()">Закрыть</button>
     </div>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО ПРОФИЛЯ ПРОДАВЦА И ОТЗЫВОВ -->
+<div id="sellerModal" class="modal-bg" onclick="closeSellerModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h2 class="modal-title" id="sName">Продавец</h2>
+    <div class="modal-price" id="sRating">★ — · загрузка...</div>
+    <div class="modal-line muted" id="sMeta"></div>
+
+    <div class="modal-btns">
+      <button type="button" class="primary" id="sWriteBtn">💬 Написать продавцу</button>
+      <button type="button" class="secondary" onclick="closeSellerModal()">Закрыть</button>
+    </div>
+
+    <div class="sectiontitle">ОСТАВИТЬ ОТЗЫВ</div>
+    <div class="field">
+      <label for="sRatingSelect">Оценка</label>
+      <select id="sRatingSelect">
+        <option value="5">★★★★★ (5)</option>
+        <option value="4">★★★★☆ (4)</option>
+        <option value="3">★★★☆☆ (3)</option>
+        <option value="2">★★☆☆☆ (2)</option>
+        <option value="1">★☆☆☆☆ (1)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="sReviewText">Ваш отзыв</label>
+      <textarea id="sReviewText" placeholder="Как прошла сделка, всё ли понравилось?"></textarea>
+    </div>
+    <button type="button" class="primary" id="sSubmitReviewBtn">⭐ Отправить отзыв</button>
+
+    <div class="sectiontitle">ОТЗЫВЫ ПОКУПАТЕЛЕЙ</div>
+    <div id="sReviewsList"></div>
+
+    <div class="sectiontitle">ОБЪЯВЛЕНИЯ ПРОДАВЦА</div>
+    <div id="sAdsList"></div>
   </div>
 </div>
 
@@ -215,6 +265,7 @@ let userAds = [];
 let selectedPhotos = [];
 let current = 'Все';
 let editingAd = null;
+let activeSeller = null;
 
 function esc(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({
@@ -236,6 +287,14 @@ function authHeaders() {
     headers['X-Telegram-Init-Data'] = tg.initData;
   }
   return headers;
+}
+
+function getSellerKey(ad) {
+  return String(ad?.seller_id || ad?.author_id || ad?.user_id || ad?.phone || ad?.id || ad?.title || 'unknown');
+}
+
+function getSellerDisplayName(ad) {
+  return ad?.seller_name || ad?.author_name || ad?.username || 'Продавец';
 }
 
 function compressImage(file, maxWidth = 800, quality = 0.7) {
@@ -323,6 +382,13 @@ function openAdObj(ad, myIdx = -1) {
   document.getElementById('mDesc').textContent = `📝 Описание: ${desc}`;
   document.getElementById('mContact').textContent = `📞 Связь: ${contactText}`;
 
+  document.getElementById('mSellerName').textContent = getSellerDisplayName(ad);
+  document.getElementById('mSellerRating').textContent = '★ Открыть профиль и отзывы';
+  document.getElementById('mOpenSeller').onclick = () => {
+    closeAdModal();
+    openSellerProfile(ad);
+  };
+
   const mEdit = document.getElementById('mEdit');
   if (myIdx >= 0) {
     mEdit.classList.remove('hidden');
@@ -359,6 +425,146 @@ function closeAdModal(e) {
     document.getElementById('adModal').classList.remove('open');
   }
 }
+
+function closeSellerModal(e) {
+  if (!e || e.target.id === 'sellerModal') {
+    document.getElementById('sellerModal').classList.remove('open');
+    activeSeller = null;
+  }
+}
+
+function renderSellerReviews(reviews = []) {
+  const box = document.getElementById('sReviewsList');
+  if (!reviews.length) {
+    box.innerHTML = '<div class="muted">Отзывов пока нет — будьте первым.</div>';
+    return;
+  }
+  box.innerHTML = reviews.map(r => {
+    const rate = Math.min(5, Math.max(1, Number(r.rating) || 5));
+    const stars = '★'.repeat(rate) + '☆'.repeat(5 - rate);
+    return `<div class="card">
+      <div><b>${esc(r.author_name || 'Покупатель')}</b> · <span style="color:var(--yellow)">${stars}</span></div>
+      <p class="muted" style="margin:6px 0 0">${esc(r.text || '')}</p>
+    </div>`;
+  }).join('');
+}
+
+function contactSellerDirect(ad) {
+  const cleanUser = String(ad?.seller_username || ad?.username || '').replace(/^@/, '');
+  if (cleanUser) {
+    const url = `https://t.me/${encodeURIComponent(cleanUser)}`;
+    if (tg?.openTelegramLink) tg.openTelegramLink(url);
+    else window.open(url, '_blank');
+    return;
+  }
+  const tgId = ad?.seller_id || ad?.author_id;
+  if (tgId && /^\d+$/.test(String(tgId))) {
+    const tgUrl = `tg://user?id=${encodeURIComponent(String(tgId))}`;
+    if (tg?.openLink) tg.openLink(tgUrl);
+    else window.location.href = tgUrl;
+    return;
+  }
+  const contactVal = ad?.phone || ad?.contact || 'Контакты не указаны';
+  if (navigator.clipboard?.writeText && ad?.phone) {
+    navigator.clipboard.writeText(ad.phone).catch(() => {});
+  }
+  alert(`Контакт продавца: ${contactVal}`);
+}
+
+async function openSellerProfile(ad) {
+  if (!ad) return;
+  const sellerId = getSellerKey(ad);
+  const sellerName = getSellerDisplayName(ad);
+  activeSeller = { id: sellerId, name: sellerName, ad };
+
+  document.getElementById('sName').textContent = sellerName;
+  document.getElementById('sRating').textContent = '★ — · загрузка...';
+  document.getElementById('sMeta').textContent = [ad.city ? `📍 ${ad.city}` : '', ad.phone ? `📞 ${ad.phone}` : ''].filter(Boolean).join(' · ');
+
+  const sellerAds = allAds.filter(item => getSellerKey(item) === sellerId);
+  document.getElementById('sAdsList').innerHTML = sellerAds.length
+    ? sellerAds.map(item => {
+        const idx = allAds.indexOf(item);
+        return `<div class="card listing" onclick="closeSellerModal();openAdByIndex(${idx})">
+          ${renderThumbHtml(item)}
+          <div>
+            <b>${esc(item.title)}</b>
+            <div class="muted">${esc(item.city || 'Город не указан')}</div>
+            <div class="price">${esc(item.price || 'Цена договорная')}</div>
+          </div>
+        </div>`;
+      }).join('')
+    : '<div class="muted">Других объявлений пока нет.</div>';
+
+  document.getElementById('sWriteBtn').onclick = () => contactSellerDirect(ad);
+  document.getElementById('sellerModal').classList.add('open');
+
+  try {
+    const res = await fetch(`${API_URL}/api/sellers/${encodeURIComponent(sellerId)}`);
+    if (res.ok) {
+      const data = await res.json();
+      const reviews = data.reviews || [];
+      const avg = typeof data.rating_avg === 'number'
+        ? data.rating_avg.toFixed(1)
+        : (reviews.length
+            ? (reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0) / reviews.length).toFixed(1)
+            : '0.0');
+      const count = typeof data.reviews_count === 'number' ? data.reviews_count : reviews.length;
+      if (data.seller_name) document.getElementById('sName').textContent = data.seller_name;
+      document.getElementById('sRating').textContent = `★ ${avg} · ${count} отзывов`;
+      renderSellerReviews(reviews);
+      return;
+    }
+  } catch (_) {}
+
+  document.getElementById('sRating').textContent = '★ 0.0 · 0 отзывов';
+  renderSellerReviews([]);
+}
+
+document.getElementById('sSubmitReviewBtn')?.addEventListener('click', async () => {
+  if (!activeSeller) return;
+  const rating = Number(document.getElementById('sRatingSelect').value || 5);
+  const text = document.getElementById('sReviewText').value.trim();
+  if (!text) {
+    alert('Напишите текст отзыва');
+    return;
+  }
+
+  const tgUser = tg?.initDataUnsafe?.user;
+  const authorName = tgUser
+    ? ([tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || tgUser.username || 'Пользователь Telegram')
+    : (profileState?.name || 'Покупатель');
+
+  const payload = {
+    rating,
+    text,
+    author_name: authorName
+  };
+
+  try {
+    const res = await fetch(`${API_URL}/api/sellers/${encodeURIComponent(activeSeller.id)}/reviews`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`Ошибка отправки отзыва (${res.status}): ${result.detail || 'проверьте сервер'}`);
+      return;
+    }
+    document.getElementById('sReviewText').value = '';
+    const reviews = result.reviews || [payload];
+    const avg = typeof result.rating_avg === 'number'
+      ? result.rating_avg.toFixed(1)
+      : (reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0) / reviews.length).toFixed(1);
+    const count = typeof result.reviews_count === 'number' ? result.reviews_count : reviews.length;
+    document.getElementById('sRating').textContent = `★ ${avg} · ${count} отзывов`;
+    renderSellerReviews(reviews);
+    alert('Отзыв опубликован!');
+  } catch (err) {
+    alert(`Ошибка сети: ${err.message}`);
+  }
+});
 
 function openEditModal(idx) {
   const ad = userAds[idx];
@@ -713,6 +919,7 @@ document.getElementById('publish').onclick = async () => {
     return;
   }
 
+  const tgUser = tg?.initDataUnsafe?.user;
   const priceRaw = document.getElementById('price').value.trim();
   const currency = document.getElementById('currency').value;
   const phoneVal = document.getElementById('phone').value.trim() || profileState.phone;
@@ -724,6 +931,10 @@ document.getElementById('publish').onclick = async () => {
   if (channelsStr) extraParts.push(`Связь: ${channelsStr}`);
   const fullDesc = [baseDesc, ...extraParts].filter(Boolean).join(' · ');
 
+  const sellerName = profileState.name
+    || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ').trim() : '')
+    || 'Продавец';
+
   const payload = {
     kind: document.getElementById('kind').value,
     title,
@@ -734,7 +945,10 @@ document.getElementById('publish').onclick = async () => {
     description: fullDesc,
     phone: phoneVal,
     contact: channelsStr || document.getElementById('contact').value,
-    photos: selectedPhotos
+    photos: selectedPhotos,
+    seller_id: tgUser?.id ? String(tgUser.id) : undefined,
+    seller_name: sellerName,
+    seller_username: tgUser?.username || ''
   };
 
   try {
