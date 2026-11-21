@@ -116,7 +116,7 @@ def create_ad(ad: AdCreate, x_telegram_init_data: str = Header(default="")):
         "description": ad.description.strip(),
         "phone": ad.phone.strip(),
         "contact": ad.contact,
-        "status": "pending",
+        "status": "approved",
         "author_id": tg_user.get("id"),
         "author_name": " ".join(
             part for part in [tg_user.get("first_name"), tg_user.get("last_name")] if part
