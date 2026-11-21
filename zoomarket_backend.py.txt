@@ -1,0 +1,306 @@
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from datetime import datetime
+import uuid
+import json
+import os
+
+app = FastAPI(title="ZooMarket Backend API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+DATA_FILE = os.environ.get("ZOOMARKET_DATA_FILE", "zoomarket_data.json")
+
+
+def load_store() -> dict:
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    data.setdefault("ads", [])
+                    data.setdefault("grooming_bookings", [])
+                    data.setdefault("orders", [])
+                    data.setdefault("reviews", {})
+                    return data
+        except Exception:
+            pass
+    return {
+        "ads": [],
+        "grooming_bookings": [],
+        "orders": [],
+        "reviews": {},
+    }
+
+
+def save_store(store: dict) -> None:
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(store, f, ensure_ascii=False, indent=2)
+
+
+store = load_store()
+
+
+class GroomingBookingCreate(BaseModel):
+    ad_id: Optional[str] = None
+    groomer_id: str = Field(..., min_length=1)
+    groomer_name: Optional[str] = "Мастер груминга"
+    service_title: Optional[str] = "Груминг"
+    date: str = Field(..., min_length=1)
+    time: str = Field(..., min_length=1)
+    pet_and_tasks: str = Field(..., min_length=1)
+    client_name: str = Field(..., min_length=1)
+    client_phone: str = Field(..., min_length=1)
+
+
+class OrderItem(BaseModel):
+    ad_id: Optional[str] = None
+    shop_id: Optional[str] = None
+    shop_name: Optional[str] = None
+    title: str
+    price: Optional[str] = "0"
+    unit_price: Optional[float] = 0
+    category: Optional[str] = ""
+    qty: int = 1
+
+
+class OrderCreate(BaseModel):
+    shop_id: str = Field(..., min_length=1)
+    shop_name: Optional[str] = "Магазин"
+    buyer_name: str = Field(..., min_length=1)
+    buyer_phone: str = Field(..., min_length=1)
+    comment: Optional[str] = ""
+    items: List[OrderItem] = Field(default_factory=list)
+
+
+class ReviewCreate(BaseModel):
+    rating: int = Field(..., ge=1, le=5)
+    text: str = Field(..., min_length=1)
+    author_name: Optional[str] = "Покупатель"
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.get("/api/ads")
+def get_ads():
+    return {"items": store.get("ads", [])}
+
+
+@app.post("/api/ads")
+async def create_ad(request: Request):
+    body = await request.json()
+    ad = {
+        "id": str(body.get("id") or uuid.uuid4()),
+        "kind": body.get("kind") or "Объявление",
+        "title": body.get("title") or "Без названия",
+        "category": body.get("category") or "Животные",
+        "cat": body.get("category") or "Животные",
+        "price": body.get("price") or "Цена договорная",
+        "currency": body.get("currency") or "",
+        "city": body.get("city") or "",
+        "description": body.get("description") or "",
+        "desc": body.get("description") or "",
+        "phone": body.get("phone") or "",
+        "contact": body.get("contact") or "Telegram",
+        "photos": body.get("photos") or [],
+        "is_shop": bool(body.get("is_shop", False)),
+        "shop_id": body.get("shop_id"),
+        "shop_name": body.get("shop_name"),
+        "is_grooming": bool(body.get("is_grooming", False)),
+        "grooming_dates": body.get("grooming_dates") or [],
+        "grooming_times": body.get("grooming_times") or [],
+        "seller_id": body.get("seller_id"),
+        "seller_name": body.get("seller_name"),
+        "seller_username": body.get("seller_username") or "",
+        "status": "approved",
+        "created_at": datetime.utcnow().isoformat() + "Z",
+    }
+    store["ads"].insert(0, ad)
+    save_store(store)
+    return {"id": ad["id"], "status": ad["status"], "item": ad}
+
+
+@app.patch("/api/ads/{ad_id}")
+async def update_ad(ad_id: str, request: Request):
+    body = await request.json()
+    for ad in store["ads"]:
+        if str(ad.get("id")) == str(ad_id):
+            ad.update(body)
+            if "description" in body and "desc" not in body:
+                ad["desc"] = body["description"]
+            if "category" in body and "cat" not in body:
+                ad["cat"] = body["category"]
+            save_store(store)
+            return {"status": "ok", "item": ad}
+    raise HTTPException(status_code=404, detail="Объявление не найдено")
+
+
+@app.delete("/api/ads/{ad_id}")
+def delete_ad(ad_id: str):
+    before = len(store["ads"])
+    store["ads"] = [a for a in store["ads"] if str(a.get("id")) != str(ad_id)]
+    if len(store["ads"]) == before:
+        raise HTTPException(status_code=404, detail="Объявление не найдено")
+    save_store(store)
+    return {"status": "deleted"}
+
+
+@app.get("/api/my-ads")
+def get_my_ads(request: Request):
+    return {"items": store.get("ads", [])}
+
+
+@app.get("/api/grooming/booked-slots")
+def get_booked_slots(groomer_id: str, ad_id: Optional[str] = None):
+    taken = []
+    for b in store["grooming_bookings"]:
+        if b.get("status") == "rejected":
+            continue
+        if str(b.get("groomer_id")) != str(groomer_id):
+            continue
+        if ad_id and b.get("ad_id") and str(b.get("ad_id")) != str(ad_id):
+            continue
+        taken.append({"date": b.get("date"), "time": b.get("time")})
+    return {"taken_slots": taken}
+
+
+@app.get("/api/grooming/bookings")
+def get_grooming_bookings(groomer_id: Optional[str] = None):
+    items = store.get("grooming_bookings", [])
+    if groomer_id:
+        filtered = [b for b in items if str(b.get("groomer_id")) == str(groomer_id)]
+        return {"items": filtered if filtered else items}
+    return {"items": items}
+
+
+@app.post("/api/grooming/bookings")
+def create_grooming_booking(payload: GroomingBookingCreate):
+    for b in store["grooming_bookings"]:
+        if (
+            b.get("status") != "rejected"
+            and str(b.get("groomer_id")) == str(payload.groomer_id)
+            and str(b.get("date")) == str(payload.date)
+            and str(b.get("time")) == str(payload.time)
+        ):
+            raise HTTPException(status_code=409, detail="Это время уже занято на выбранную дату")
+
+    booking = {
+        "id": str(uuid.uuid4()),
+        "ad_id": payload.ad_id,
+        "groomer_id": payload.groomer_id,
+        "groomer_name": payload.groomer_name or "Мастер груминга",
+        "service_title": payload.service_title or "Груминг",
+        "date": payload.date,
+        "time": payload.time,
+        "pet_and_tasks": payload.pet_and_tasks,
+        "client_name": payload.client_name,
+        "client_phone": payload.client_phone,
+        "status": "pending",
+        "created_at": datetime.utcnow().isoformat() + "Z",
+    }
+    store["grooming_bookings"].insert(0, booking)
+    save_store(store)
+    return {"id": booking["id"], "status": booking["status"], "item": booking}
+
+
+@app.post("/api/grooming/bookings/{booking_id}/confirm")
+def confirm_grooming_booking(booking_id: str):
+    for b in store["grooming_bookings"]:
+        if str(b.get("id")) == str(booking_id):
+            b["status"] = "confirmed"
+            save_store(store)
+            return {"status": "confirmed", "item": b}
+    raise HTTPException(status_code=404, detail="Запись не найдена")
+
+
+@app.post("/api/orders")
+def create_order(payload: OrderCreate):
+    total_sum = sum((float(it.unit_price or 0) * int(it.qty or 1)) for it in payload.items)
+    order = {
+        "id": str(uuid.uuid4()),
+        "shop_id": payload.shop_id,
+        "shop_name": payload.shop_name or "Магазин",
+        "buyer_name": payload.buyer_name,
+        "buyer_phone": payload.buyer_phone,
+        "comment": payload.comment or "",
+        "items": [it.model_dump() for it in payload.items],
+        "total_sum": total_sum,
+        "status": "pending",
+        "created_at": datetime.utcnow().isoformat() + "Z",
+    }
+    store["orders"].insert(0, order)
+    save_store(store)
+    return {"id": order["id"], "status": order["status"], "item": order}
+
+
+@app.get("/api/shop-orders")
+def get_shop_orders(shop_id: Optional[str] = None):
+    items = store.get("orders", [])
+    if shop_id:
+        filtered = [o for o in items if str(o.get("shop_id")) == str(shop_id)]
+        return {"items": filtered if filtered else items}
+    return {"items": items}
+
+
+@app.post("/api/orders/{order_id}/confirm")
+def confirm_order(order_id: str):
+    for o in store["orders"]:
+        if str(o.get("id")) == str(order_id):
+            o["status"] = "confirmed"
+            save_store(store)
+            return {"status": "confirmed", "item": o}
+    raise HTTPException(status_code=404, detail="Заказ не найден")
+
+
+@app.get("/api/sellers/{seller_id}")
+def get_seller_profile(seller_id: str):
+    reviews = store["reviews"].get(str(seller_id), [])
+    count = len(reviews)
+    avg = round(sum(int(r.get("rating", 5)) for r in reviews) / count, 1) if count else 0.0
+    seller_name = None
+    for ad in store["ads"]:
+        if str(ad.get("seller_id") or ad.get("shop_id") or ad.get("id") or ad.get("title")) == str(seller_id):
+            seller_name = ad.get("seller_name") or ad.get("shop_name") or ad.get("title")
+            break
+    return {
+        "seller_id": seller_id,
+        "seller_name": seller_name,
+        "rating_avg": avg,
+        "reviews_count": count,
+        "reviews": reviews,
+    }
+
+
+@app.post("/api/sellers/{seller_id}/reviews")
+def add_seller_review(seller_id: str, payload: ReviewCreate):
+    sid = str(seller_id)
+    store["reviews"].setdefault(sid, [])
+    review = {
+        "id": str(uuid.uuid4()),
+        "rating": payload.rating,
+        "text": payload.text,
+        "author_name": payload.author_name or "Покупатель",
+        "created_at": datetime.utcnow().isoformat() + "Z",
+    }
+    store["reviews"][sid].insert(0, review)
+    save_store(store)
+    reviews = store["reviews"][sid]
+    count = len(reviews)
+    avg = round(sum(int(r.get("rating", 5)) for r in reviews) / count, 1) if count else 0.0
+    return {
+        "status": "ok",
+        "rating_avg": avg,
+        "reviews_count": count,
+        "reviews": reviews,
+    }
