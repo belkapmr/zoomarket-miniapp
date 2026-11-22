@@ -433,7 +433,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <button class="nav" data-page="profile"><span>👤</span>Профиль</button>
 </nav>
 <script>
-const API_URL = "https://moderator-hart-layer-extended.trycloudflare.com";
+const API_URL = "https://conversation-discusses-sussex-gay.trycloudflare.com";
 const CART_KEY = "zoomarket_shop_cart_v1";
 const SAVED_KEY = "zoomarket_saved_ads_v1";
 const FREE_BOOST_KEY = "zoomarket_free_boosts_v1";
@@ -827,6 +827,13 @@ function getGroomDates(ad) {
   const today = new Date().toISOString().slice(0, 10);
   const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
   return [today, tomorrow];
+}
+
+function getGroomTimes(ad) {
+  if (Array.isArray(ad?.grooming_times) && ad.grooming_times.length) {
+    return ad.grooming_times;
+  }
+  return ['10:00', '12:00', '14:30', '17:00'];
 }
 
 function getGroomTimesForDate(ad, dateStr) {
