@@ -70,6 +70,10 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 .zm-preview-meta{font-size:13px;color:var(--muted)}
 .zm-preview-contact{font-size:13px;color:var(--white)}
 .zm-saved-note{font-size:12px;color:var(--green);min-height:16px}
+
+.vet-badge{display:inline-block;background:#103842;color:#6ce5ff;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}
+.qty-select-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.qty-select-row .qty-box{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:6px 10px}
 </style></head>
 <body>
 <header>
@@ -99,6 +103,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
       <option value="all">Все сделки</option>
       <option value="shop">Только магазин</option>
       <option value="grooming">Только груминг</option>
+      <option value="vet">Только ветеринары</option>
       <option value="free">Отдам даром</option>
     </select>
   </div>
@@ -144,6 +149,28 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
   </div>
 </div>
 
+<label class="check-row"><input type="checkbox" id="isVet"><span><b>🩺 Это приём ветеринара</b><span class="muted" style="display:block">Укажите свободные дни и время приёма — владельцы животных смогут записаться</span></span></label>
+
+<div id="vetDoctorBox" class="hidden">
+  <div class="field">
+    <label for="vetDayPicker">Свободные дни и часы приёма по дням</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input id="vetDayPicker" type="date" style="flex:1;min-width:150px">
+      <button type="button" class="secondary small-btn" id="addVetDayBtn">+ Добавить день</button>
+    </div>
+  </div>
+  <div id="vetScheduleDaysBox"></div>
+
+  <div class="field">
+    <label for="vetDates">Общие свободные дни приёма (через запятую)</label>
+    <input id="vetDates" placeholder="Например: 2026-11-26, 2026-11-27">
+  </div>
+  <div class="field">
+    <label for="vetTimes">Общее свободное время приёма (через запятую)</label>
+    <input id="vetTimes" placeholder="Например: 09:30, 11:00, 14:00, 16:30">
+  </div>
+</div>
+
 <div class="field"><label>Что размещаем?</label><select id="kind"><option>Животное</option><option>Зоотовар</option><option>Услуга</option><option>Отдам даром</option><option>Ищу</option></select></div>
 <div class="field"><label>Название объявления</label><input id="title" placeholder="Например: Щенки корги / Груминг собак"></div>
 <div class="field"><label>Категория</label><select id="category"><option>Животные</option><option>Товары</option><option>Услуги</option></select></div>
@@ -164,6 +191,8 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
   <h2>Мои объявления</h2>
   <p class="notice">Бесплатное поднятие закрепляет объявление вверху ленты на 24 часа и доступно 1 раз в 24 часа.</p>
   <div id="mylist" class="empty">Пока нет объявлений.<strong>Создайте первое!</strong></div>
+  <div class="sectiontitle">ЗАПИСИ К ВЕТЕРИНАРУ</div>
+  <div id="vetAppointmentsList" class="muted">Загрузка записей...</div>
   <div class="sectiontitle">ЗАПИСИ НА ГРУМИНГ</div>
   <div id="groomingBookingsList" class="muted">Загрузка записей...</div>
   <div class="sectiontitle">ЗАКАЗЫ МАГАЗИНА</div>
@@ -243,6 +272,53 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
   </div>
 </section>
 </main>
+
+<!-- МОДАЛЬНОЕ ОКНО ЗАПИСИ К ВЕТЕРИНАРУ -->
+<div id="vetModal" class="modal-bg" onclick="closeVetModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h2 class="modal-title" id="vTitle">🩺 Записаться на приём к ветеринару</h2>
+    <div class="modal-line muted" id="vDoctorLine"></div>
+
+    <div class="zm-block-title">1. ВЫБЕРИТЕ ДЕНЬ ПРИЁМА</div>
+    <div class="slot-chips" id="vDatesBox"></div>
+
+    <div class="zm-block-title">2. ВЫБЕРИТЕ СВОБОДНОЕ ВРЕМЯ</div>
+    <div class="slot-chips" id="vTimesBox"></div>
+
+    <div class="row">
+      <div class="field">
+        <label for="vPetSpecies">Кто питомец (вид / порода / возраст)</label>
+        <input id="vPetSpecies" placeholder="Например: Кот, британец, 3 года">
+      </div>
+      <div class="field">
+        <label for="vPetWeight">Вес питомца</label>
+        <input id="vPetWeight" placeholder="Например: 5.2 кг">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="vProblem">3. Какая проблема / симптомы / повод приёма?</label>
+      <textarea id="vProblem" placeholder="Опишите симптомы, как давно началось, аппетит, температура, прививки или осмотр..."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="vClientName">Ваше имя</label>
+      <input id="vClientName" placeholder="Введите имя">
+    </div>
+
+    <div class="field">
+      <label for="vClientPhone">Ваш телефон</label>
+      <input id="vClientPhone" type="tel" placeholder="+373... / 0 6xx xx xxx">
+    </div>
+
+    <p class="notice">🩺 Заявка уйдёт ветеринару в Telegram (по ID/логину) и появится в списке записей.</p>
+
+    <div class="modal-btns">
+      <button type="button" class="secondary" onclick="closeVetModal()">Отмена</button>
+      <button type="button" class="primary" id="vSubmitBookingBtn">🩺 Записаться на приём</button>
+    </div>
+  </div>
+</div>
 
 <!-- МОДАЛЬНОЕ ОКНО ЗАПИСИ НА ГРУМИНГ -->
 <div id="groomingModal" class="modal-bg" onclick="closeGroomingModal(event)">
@@ -333,6 +409,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
     <span class="boost-badge hidden" id="mBoostBadge">🚀 В ТОПЕ</span>
     <span class="shop-badge hidden" id="mShopBadge">🏪 МАГАЗИН</span>
     <span class="groom-badge hidden" id="mGroomBadge">✂️ ГРУМИНГ</span>
+    <span class="vet-badge hidden" id="mVetBadge">🩺 ВЕТЕРИНАР</span>
     <span class="soldout-badge hidden" id="mSoldoutBadge">❌ ЗАКОНЧИЛСЯ</span>
     <h2 class="modal-title" id="mTitle"></h2>
     <div class="modal-price" id="mPrice"></div>
@@ -342,11 +419,27 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
     <div class="modal-line" id="mContact"></div>
 
     <div id="mShopActionBox" class="hidden" style="margin:12px 0">
-      <button type="button" class="primary" id="mAddToCartBtn">🛒 Добавить в корзину</button>
+      <div class="qty-select-row">
+        <span class="muted">Количество:</span>
+        <div class="qty-box">
+          <button type="button" class="qty-btn" id="mQtyMinusBtn">−</button>
+          <b id="mQtyValue">1</b>
+          <button type="button" class="qty-btn" id="mQtyPlusBtn">+</button>
+        </div>
+        <span class="muted" id="mQtySubtotal"></span>
+      </div>
+      <div class="row" style="gap:8px">
+        <button type="button" class="primary" id="mAddToCartBtn">🛒 Добавить в корзину</button>
+        <button type="button" class="secondary" id="mBuyNowBtn">💳 Продолжить покупку</button>
+      </div>
     </div>
 
     <div id="mGroomActionBox" class="hidden" style="margin:12px 0">
       <button type="button" class="primary" id="mBookGroomingBtn">✂️ Записаться на груминг</button>
+    </div>
+
+    <div id="mVetActionBox" class="hidden" style="margin:12px 0">
+      <button type="button" class="primary" id="mBookVetBtn">🩺 Записаться на приём</button>
     </div>
 
     <div class="seller-box">
@@ -433,6 +526,391 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 <button class="nav" data-page="profile"><span>👤</span>Профиль</button>
 </nav>
 <script>
+
+let vetAppointments = [];
+let activeVetAd = null;
+let selectedVetDate = '';
+let selectedVetTime = '';
+let takenVetSlots = [];
+let vetScheduleByDateDraft = {};
+let modalSelectedQty = 1;
+
+function isVetAd(ad) {
+  if (Boolean(ad?.is_vet || ad?.vet || ad?.is_veterinary)) return true;
+  const text = `${ad?.title || ''} ${ad?.category || ''} ${ad?.kind || ''}`.toLowerCase();
+  return text.includes('ветеринар') || text.includes('ветуслуг') || text.includes('ветклиник');
+}
+
+function getOwnerTelegramTarget(ad) {
+  const rawUserId = ad?.seller_id || ad?.shop_id || ad?.groomer_id || ad?.vet_id || ad?.author_id || ad?.user_id || '';
+  const cleanId = /^\d+$/.test(String(rawUserId || '').trim()) ? String(rawUserId).trim() : '';
+  const rawUsername = ad?.seller_username || ad?.username || ad?.tg_username || ad?.owner_username || '';
+  const cleanUsername = String(rawUsername || '').replace(/^@/, '').trim();
+  return {
+    owner_id: cleanId,
+    owner_username: cleanUsername,
+    owner_name: getSellerDisplayName(ad)
+  };
+}
+
+function getVetScheduleMap(ad) {
+  const map = ad?.vet_schedule_by_date;
+  if (map && typeof map === 'object' && !Array.isArray(map)) {
+    const clean = {};
+    for (const [dt, times] of Object.entries(map)) {
+      if (dt && Array.isArray(times) && times.length) {
+        clean[String(dt)] = times.map(String);
+      }
+    }
+    if (Object.keys(clean).length) return clean;
+  }
+  return null;
+}
+
+function getVetDates(ad) {
+  const map = getVetScheduleMap(ad);
+  if (map) return Object.keys(map).sort();
+  if (Array.isArray(ad?.vet_dates) && ad.vet_dates.length) return ad.vet_dates;
+  const today = new Date().toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  return [today, tomorrow];
+}
+
+function getVetTimes(ad) {
+  if (Array.isArray(ad?.vet_times) && ad.vet_times.length) return ad.vet_times;
+  return ['09:30', '11:00', '14:00', '16:30'];
+}
+
+function getVetTimesForDate(ad, dateStr) {
+  const map = getVetScheduleMap(ad);
+  if (map && dateStr && Array.isArray(map[dateStr]) && map[dateStr].length) return map[dateStr];
+  if (Array.isArray(ad?.vet_times) && ad.vet_times.length) return ad.vet_times;
+  return ['09:30', '11:00', '14:00', '16:30'];
+}
+
+function renderVetScheduleDraft() {
+  const box = document.getElementById('vetScheduleDaysBox');
+  if (!box) return;
+  const dates = Object.keys(vetScheduleByDateDraft).sort();
+  if (!dates.length) {
+    box.innerHTML = '';
+    return;
+  }
+  box.innerHTML = dates.map(dt => {
+    const timesStr = (vetScheduleByDateDraft[dt] || []).join(', ');
+    return `<div class="sched-day-card">
+      <div class="sched-day-top">
+        <b>📅 ${esc(dt)}</b>
+        <button type="button" class="danger-btn small-btn" onclick="removeVetScheduleDay('${esc(dt)}')">Удалить день</button>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Часы приёма на ${esc(dt)} (через запятую)</label>
+        <input type="text" value="${esc(timesStr)}" placeholder="09:30, 11:00, 14:00" oninput="updateVetScheduleDayTimes('${esc(dt)}', this.value)">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addVetScheduleDay() {
+  const picker = document.getElementById('vetDayPicker');
+  const dt = picker?.value;
+  if (!dt) {
+    alert('Выберите день приёма');
+    return;
+  }
+  if (!vetScheduleByDateDraft[dt]) {
+    vetScheduleByDateDraft[dt] = ['09:30', '11:30', '15:00'];
+  }
+  renderVetScheduleDraft();
+  updatePreview();
+}
+
+function updateVetScheduleDayTimes(dt, val) {
+  vetScheduleByDateDraft[dt] = parseSlotList(val, []);
+  updatePreview();
+}
+
+function removeVetScheduleDay(dt) {
+  delete vetScheduleByDateDraft[dt];
+  renderVetScheduleDraft();
+  updatePreview();
+}
+
+document.getElementById('addVetDayBtn')?.addEventListener('click', addVetScheduleDay);
+
+document.getElementById('isVet')?.addEventListener('change', () => {
+  const checked = Boolean(document.getElementById('isVet')?.checked);
+  document.getElementById('vetDoctorBox')?.classList.toggle('hidden', !checked);
+  if (checked) {
+    document.getElementById('category').value = 'Услуги';
+    document.getElementById('kind').value = 'Услуга';
+    renderVetScheduleDraft();
+  }
+  updatePreview();
+  syncProfileUI();
+});
+
+function renderVetSlots() {
+  if (!activeVetAd) return;
+  const dates = getVetDates(activeVetAd);
+  if (!selectedVetDate || !dates.includes(selectedVetDate)) {
+    selectedVetDate = dates[0] || '';
+  }
+  const times = getVetTimesForDate(activeVetAd, selectedVetDate);
+
+  const datesBox = document.getElementById('vDatesBox');
+  datesBox.innerHTML = dates.map(d => `
+    <button type="button" class="slot-chip ${d === selectedVetDate ? 'active' : ''}" data-vdate="${esc(d)}">${esc(d)}</button>
+  `).join('');
+
+  datesBox.querySelectorAll('[data-vdate]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedVetDate = btn.dataset.vdate;
+      selectedVetTime = '';
+      renderVetSlots();
+    });
+  });
+
+  const timesBox = document.getElementById('vTimesBox');
+  timesBox.innerHTML = times.map(t => {
+    const isTaken = takenVetSlots.some(s => String(s.date) === String(selectedVetDate) && String(s.time) === String(t));
+    const isActive = !isTaken && String(t) === String(selectedVetTime);
+    return `<button type="button" class="slot-chip ${isActive ? 'active' : ''}" data-vtime="${esc(t)}" ${isTaken ? 'disabled' : ''}>${esc(t)}${isTaken ? ' · занято' : ''}</button>`;
+  }).join('');
+
+  timesBox.querySelectorAll('[data-vtime]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      selectedVetTime = btn.dataset.vtime;
+      renderVetSlots();
+    });
+  });
+}
+
+async function openVetModal(ad) {
+  if (!ad) return;
+  activeVetAd = ad;
+  selectedVetDate = '';
+  selectedVetTime = '';
+  takenVetSlots = [];
+
+  const vetId = getSellerKey(ad);
+  const vetName = getSellerDisplayName(ad);
+
+  document.getElementById('vTitle').textContent = `🩺 ${ad.title || 'Запись на приём к ветеринару'}`;
+  document.getElementById('vDoctorLine').textContent = `Врач / клиника: ${vetName}${ad.city ? ' · ' + ad.city : ''}`;
+
+  const u = tg?.initDataUnsafe?.user;
+  const cName = document.getElementById('vClientName');
+  const cPhone = document.getElementById('vClientPhone');
+  if (cName && !cName.value.trim()) {
+    cName.value = profileState?.name || (u ? [u.first_name, u.last_name].filter(Boolean).join(' ') : '');
+  }
+  if (cPhone && !cPhone.value.trim() && profileState?.phone) {
+    cPhone.value = profileState.phone;
+  }
+
+  renderVetSlots();
+  document.getElementById('vetModal').classList.add('open');
+
+  try {
+    const q = new URLSearchParams({ vet_id: vetId });
+    if (ad.id) q.set('ad_id', String(ad.id));
+    const res = await fetch(`${API_URL}/api/vet/booked-slots?${q.toString()}`);
+    if (res.ok) {
+      const data = await res.json();
+      takenVetSlots = Array.isArray(data.taken_slots) ? data.taken_slots : [];
+      renderVetSlots();
+    }
+  } catch (_) {}
+}
+
+function closeVetModal(e) {
+  if (!e || e.target.id === 'vetModal') {
+    document.getElementById('vetModal').classList.remove('open');
+    activeVetAd = null;
+  }
+}
+
+document.getElementById('vSubmitBookingBtn')?.addEventListener('click', async () => {
+  if (!activeVetAd) return;
+  if (!selectedVetDate) {
+    alert('Выберите день приёма');
+    return;
+  }
+  if (!selectedVetTime) {
+    alert('Выберите свободное время приёма');
+    return;
+  }
+  const petSpecies = document.getElementById('vPetSpecies')?.value.trim() || '';
+  const petWeight = document.getElementById('vPetWeight')?.value.trim() || '';
+  const problem = document.getElementById('vProblem')?.value.trim() || '';
+  const clientName = document.getElementById('vClientName')?.value.trim() || '';
+  const clientPhone = document.getElementById('vClientPhone')?.value.trim() || '';
+
+  if (!petSpecies) {
+    alert('Укажите кто питомец (вид / порода / возраст)');
+    return;
+  }
+  if (!problem) {
+    alert('Укажите какая проблема или симптомы');
+    return;
+  }
+  if (!clientName || !clientPhone) {
+    alert('Укажите ваше имя и телефон');
+    return;
+  }
+
+  const ownerTarget = getOwnerTelegramTarget(activeVetAd);
+  const tgUser = tg?.initDataUnsafe?.user;
+  const payload = {
+    ad_id: activeVetAd.id ? String(activeVetAd.id) : null,
+    vet_id: getSellerKey(activeVetAd),
+    vet_name: getSellerDisplayName(activeVetAd),
+    vet_phone: activeVetAd.phone || '',
+    vet_username: ownerTarget.owner_username,
+    owner_id: ownerTarget.owner_id,
+    owner_username: ownerTarget.owner_username,
+    service_title: activeVetAd.title || 'Приём ветеринара',
+    date: selectedVetDate,
+    time: selectedVetTime,
+    pet_species: petSpecies,
+    pet_weight: petWeight,
+    problem,
+    client_id: tgUser?.id ? String(tgUser.id) : '',
+    client_username: tgUser?.username || '',
+    client_name: clientName,
+    client_phone: clientPhone
+  };
+
+  try {
+    const res = await fetch(`${API_URL}/api/vet/appointments`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`Ошибка записи (${res.status}): ${result.detail || 'проверьте сервер'}`);
+      return;
+    }
+
+    await sendTelegramNotification('vet_appointment_created', {
+      appointment_id: result.id || result.item?.id || '',
+      ...payload
+    });
+
+    document.getElementById('vPetSpecies').value = '';
+    document.getElementById('vPetWeight').value = '';
+    document.getElementById('vProblem').value = '';
+    closeVetModal();
+    await loadVetAppointments();
+    alert('Запись на приём отправлена ветеринару в Telegram!');
+  } catch (err) {
+    alert(`Ошибка сети: ${err.message}`);
+  }
+});
+
+async function loadVetAppointments() {
+  const box = document.getElementById('vetAppointmentsList');
+  const tgUser = tg?.initDataUnsafe?.user;
+  const userId = tgUser?.id ? String(tgUser.id) : '';
+  const username = tgUser?.username || '';
+  if (!userId && !username) {
+    if (box) box.innerHTML = '<div class="muted">Откройте мини-приложение в Telegram, чтобы видеть записи к ветеринару.</div>';
+    return;
+  }
+  try {
+    const q = new URLSearchParams({
+      user_id: userId,
+      vet_id: userId,
+      username
+    });
+    const res = await fetch(`${API_URL}/api/vet/appointments?${q.toString()}`, {
+      headers: authHeaders()
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    vetAppointments = Array.isArray(data) ? data : (data.items || []);
+  } catch (_) {
+    vetAppointments = [];
+  }
+  renderVetAppointments();
+}
+
+function renderVetAppointments() {
+  const box = document.getElementById('vetAppointmentsList');
+  if (!box) return;
+  if (!vetAppointments.length) {
+    box.innerHTML = '<div class="muted">Записей к ветеринару пока нет.</div>';
+    return;
+  }
+  const tgUser = tg?.initDataUnsafe?.user;
+  const myId = tgUser?.id ? String(tgUser.id) : '';
+  const myUser = (tgUser?.username || '').toLowerCase();
+
+  box.innerHTML = vetAppointments.map((a, idx) => {
+    const isConfirmed = a.status === 'confirmed';
+    const isCompleted = a.status === 'completed';
+    const isCancelled = a.status === 'cancelled' || a.status === 'rejected';
+    const isDoctor = (myId && (String(a.vet_id || '') === myId || String(a.owner_id || '') === myId))
+      || (myUser && String(a.vet_username || a.owner_username || '').toLowerCase() === myUser);
+
+    let statusBadge = '<span style="color:var(--yellow)">⏳ Ожидает подтверждения</span>';
+    if (isConfirmed) statusBadge = '<span style="color:var(--green)">✅ Подтверждён</span>';
+    if (isCompleted) statusBadge = '<span style="color:var(--green)">🏁 Приём прошёл</span>';
+    if (isCancelled) statusBadge = '<span style="color:#ff9ea2">❌ Отменён</span>';
+
+    const confirmBtn = (!isConfirmed && !isCompleted && !isCancelled && isDoctor)
+      ? `<button type="button" class="secondary small-btn" onclick="updateVetAppointmentStatus(${idx}, 'confirmed')">✅ Подтвердить</button>`
+      : '';
+    const completeBtn = (!isCompleted && !isCancelled && isDoctor)
+      ? `<button type="button" class="success-btn small-btn" onclick="updateVetAppointmentStatus(${idx}, 'completed')">🏁 Завершить</button>`
+      : '';
+    const cancelBtn = (!isCancelled)
+      ? `<button type="button" class="danger-btn small-btn" onclick="updateVetAppointmentStatus(${idx}, 'cancelled')">❌ Отменить</button>`
+      : '';
+
+    return `<div class="card">
+      <div><b>🩺 ${esc(a.date || '')} в ${esc(a.time || '')}</b> · ${statusBadge}</div>
+      <div class="muted" style="margin-top:6px">Врач: ${esc(a.vet_name || 'Ветеринар')} · Клиент: ${esc(a.client_name || '')} (${esc(a.client_phone || '')})</div>
+      <div class="muted">Питомец: ${esc(a.pet_species || '')}${a.pet_weight ? ` · ${esc(a.pet_weight)}` : ''}</div>
+      <div class="muted">Проблема: ${esc(a.problem || '')}</div>
+      <div class="my-actions">${confirmBtn}${completeBtn}${cancelBtn}</div>
+    </div>`;
+  }).join('');
+}
+
+async function updateVetAppointmentStatus(idx, status) {
+  const appt = vetAppointments[idx];
+  if (!appt?.id) return;
+  try {
+    const res = await fetch(`${API_URL}/api/vet/appointments/${encodeURIComponent(appt.id)}/status`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ status })
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`Ошибка обновления (${res.status}): ${result.detail || 'проверьте сервер'}`);
+      return;
+    }
+    appt.status = status;
+    await sendTelegramNotification('vet_appointment_status', {
+      appointment_id: appt.id,
+      status,
+      client_id: appt.client_id || '',
+      client_username: appt.client_username || '',
+      vet_name: appt.vet_name || 'Ветеринар',
+      date: appt.date || '',
+      time: appt.time || ''
+    });
+    renderVetAppointments();
+  } catch (err) {
+    alert(`Ошибка сети: ${err.message}`);
+  }
+}
+
 const API_URL = "https://conversation-discusses-sussex-gay.trycloudflare.com";
 const CART_KEY = "zoomarket_shop_cart_v1";
 const SAVED_KEY = "zoomarket_saved_ads_v1";
@@ -495,6 +973,8 @@ async function sendTelegramNotification(eventType, data = {}) {
   const tgUser = tg?.initDataUnsafe?.user;
   const payload = {
     event: eventType,
+    target_user_id: String(data.owner_id || data.shop_id || data.groomer_id || data.vet_id || data.buyer_id || data.client_id || ''),
+    target_username: String(data.owner_username || data.shop_username || data.groomer_username || data.vet_username || data.buyer_username || data.client_username || '').replace(/^@/, ''),
     actor_id: tgUser?.id ? String(tgUser.id) : '',
     actor_username: tgUser?.username || '',
     actor_name: tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : (profileState?.name || ''),
@@ -752,12 +1232,13 @@ function renderSaved() {
     const boostTag = isBoostedAd(x) ? '<span class="boost-badge">🚀 В ТОПЕ</span>' : '';
     const shopTag = isShopAd(x) ? '<span class="shop-badge">🏪 МАГАЗИН</span>' : '';
     const groomTag = isGroomingAd(x) ? '<span class="groom-badge">✂️ ГРУМИНГ</span>' : '';
+    const vetTag = isVetAd(x) ? '<span class="vet-badge">🩺 ВЕТЕРИНАР</span>' : '';
     const soldTag = (isShopAd(x) && stock !== null && stock <= 0) ? '<span class="soldout-badge">❌ ЗАКОНЧИЛСЯ</span>' : '';
     return `<div class="card listing ${isBoostedAd(x) ? 'is-boosted' : ''}" onclick="openAdByIndex(${realIdx})">
       ${renderThumbHtml(x)}
       <div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-          <div><span class="tag">${esc(cat)}</span>${boostTag}${shopTag}${groomTag}${soldTag}</div>
+          <div><span class="tag">${esc(cat)}</span>${boostTag}${shopTag}${groomTag}${vetTag}${soldTag}</div>
           <button type="button" class="fav-btn active" onclick="toggleSaveAd(allAds[${realIdx}], event)">❤️</button>
         </div>
         <h3>${esc(x.title)}</h3>
@@ -935,7 +1416,7 @@ function updateCartBadge() {
   if (el) el.textContent = String(totalQty);
 }
 
-function addAdToCart(ad) {
+function addAdToCart(ad, qtyToAdd = 1, openCheckoutAfter = false) {
   if (!ad) return;
   const stock = getAdStock(ad);
   if (stock !== null && stock <= 0) {
@@ -943,6 +1424,8 @@ function addAdToCart(ad) {
     return;
   }
 
+  const safeQty = Math.max(1, Math.floor(Number(qtyToAdd) || 1));
+  const ownerTarget = getOwnerTelegramTarget(ad);
   const shopId = getSellerKey(ad);
   const shopName = getSellerDisplayName(ad);
   const adId = String(ad.id || ad.title);
@@ -956,28 +1439,41 @@ function addAdToCart(ad) {
 
   const existing = cartItems.find(it => String(it.ad_id) === adId);
   if (existing) {
-    const nextQty = (Number(existing.qty) || 1) + 1;
+    const nextQty = (Number(existing.qty) || 1) + safeQty;
     if (stock !== null && nextQty > stock) {
       alert(`В наличии доступно только ${stock} шт.`);
       return;
     }
     existing.qty = nextQty;
+    existing.owner_id = ownerTarget.owner_id || existing.owner_id || '';
+    existing.owner_username = ownerTarget.owner_username || existing.owner_username || '';
     if (stock !== null) existing.max_stock = stock;
   } else {
+    if (stock !== null && safeQty > stock) {
+      alert(`В наличии доступно только ${stock} шт.`);
+      return;
+    }
     cartItems.push({
       ad_id: adId,
       shop_id: shopId,
       shop_name: shopName,
+      owner_id: ownerTarget.owner_id,
+      owner_username: ownerTarget.owner_username,
       title: ad.title || 'Товар',
       price: ad.price || '0',
       unit_price: parsePriceNum(ad.price),
       category: ad.cat || ad.category || '',
       max_stock: stock,
-      qty: 1
+      qty: safeQty
     });
   }
   saveCart();
-  alert(`Добавлено в корзину: ${ad.title}`);
+  if (openCheckoutAfter) {
+    closeAdModal();
+    openCartModal();
+    return;
+  }
+  alert(`Добавлено в корзину: ${ad.title} (${safeQty} шт.)`);
 }
 
 function toggleDeliveryAddressField() {
@@ -1092,6 +1588,8 @@ document.getElementById('submitOrderBtn')?.addEventListener('click', async () =>
       body: JSON.stringify({
         shop_id: shopId,
         shop_name: shopName,
+        owner_id: itemsSnapshot[0]?.owner_id || (/^\d+$/.test(shopId) ? shopId : ''),
+        owner_username: itemsSnapshot[0]?.owner_username || '',
         buyer_id: tgUser?.id ? String(tgUser.id) : '',
         buyer_username: tgUser?.username || '',
         buyer_name: buyerName,
@@ -1112,6 +1610,8 @@ document.getElementById('submitOrderBtn')?.addEventListener('click', async () =>
       order_id: result.id || result.item?.id || '',
       shop_id: shopId,
       shop_name: shopName,
+      owner_id: itemsSnapshot[0]?.owner_id || (/^\d+$/.test(shopId) ? shopId : ''),
+      owner_username: itemsSnapshot[0]?.owner_username || '',
       buyer_id: tgUser?.id ? String(tgUser.id) : '',
       buyer_username: tgUser?.username || '',
       buyer_name: buyerName,
@@ -1249,12 +1749,15 @@ document.getElementById('gSubmitBookingBtn')?.addEventListener('click', async ()
 
   const combinedTasks = `Порода/размер: ${petBreed} · Длительность: ${duration} · ${petTasks}`;
   const tgUser = tg?.initDataUnsafe?.user;
+  const groomOwnerTarget = getOwnerTelegramTarget(activeGroomingAd);
   const payload = {
     ad_id: activeGroomingAd.id ? String(activeGroomingAd.id) : null,
     groomer_id: getSellerKey(activeGroomingAd),
     groomer_name: getSellerDisplayName(activeGroomingAd),
     groomer_phone: activeGroomingAd.phone || '',
-    groomer_username: activeGroomingAd.seller_username || activeGroomingAd.username || '',
+    groomer_username: groomOwnerTarget.owner_username,
+    owner_id: groomOwnerTarget.owner_id,
+    owner_username: groomOwnerTarget.owner_username,
     service_title: activeGroomingAd.title || 'Груминг',
     date: selectedGroomDate,
     time: selectedGroomTime,
@@ -1375,9 +1878,11 @@ function openAdObj(ad, myIdx = -1) {
   mPhotos.style.display = photos.length ? 'flex' : 'none';
 
   document.getElementById('mTag').textContent = `${cat}${kind}`;
+  const vetFlag = isVetAd(ad);
   document.getElementById('mBoostBadge').classList.toggle('hidden', !isBoostedAd(ad));
   document.getElementById('mShopBadge').classList.toggle('hidden', !isShopAd(ad));
   document.getElementById('mGroomBadge').classList.toggle('hidden', !isGroomingAd(ad));
+  document.getElementById('mVetBadge').classList.toggle('hidden', !vetFlag);
   document.getElementById('mSoldoutBadge').classList.toggle('hidden', !soldOut);
 
   document.getElementById('mTitle').textContent = ad.title || 'Без названия';
@@ -1395,23 +1900,62 @@ function openAdObj(ad, myIdx = -1) {
   document.getElementById('mDesc').textContent = `📝 Описание: ${desc}`;
   document.getElementById('mContact').textContent = `📞 Связь: ${contactText}`;
 
+  modalSelectedQty = 1;
   const shopActionBox = document.getElementById('mShopActionBox');
   shopActionBox.classList.toggle('hidden', !isShopAd(ad));
   const addBtn = document.getElementById('mAddToCartBtn');
+  const buyNowBtn = document.getElementById('mBuyNowBtn');
+  const qtyValEl = document.getElementById('mQtyValue');
+  const qtySubEl = document.getElementById('mQtySubtotal');
+  const unitPriceNum = parsePriceNum(ad.price);
+
+  function refreshModalQtyUI() {
+    if (qtyValEl) qtyValEl.textContent = String(modalSelectedQty);
+    if (qtySubEl) {
+      qtySubEl.textContent = unitPriceNum > 0 ? `Сумма: ${unitPriceNum * modalSelectedQty}` : '';
+    }
+  }
+  refreshModalQtyUI();
+
+  document.getElementById('mQtyMinusBtn').onclick = () => {
+    if (modalSelectedQty > 1) {
+      modalSelectedQty -= 1;
+      refreshModalQtyUI();
+    }
+  };
+  document.getElementById('mQtyPlusBtn').onclick = () => {
+    if (stock !== null && modalSelectedQty + 1 > stock) {
+      alert(`В наличии доступно только ${stock} шт.`);
+      return;
+    }
+    modalSelectedQty += 1;
+    refreshModalQtyUI();
+  };
+
   if (soldOut) {
     addBtn.disabled = true;
     addBtn.textContent = '❌ Закончился';
+    buyNowBtn.disabled = true;
   } else {
     addBtn.disabled = false;
     addBtn.textContent = '🛒 Добавить в корзину';
+    buyNowBtn.disabled = false;
   }
-  addBtn.onclick = () => addAdToCart(ad);
+  addBtn.onclick = () => addAdToCart(ad, modalSelectedQty, false);
+  buyNowBtn.onclick = () => addAdToCart(ad, modalSelectedQty, true);
 
   const groomActionBox = document.getElementById('mGroomActionBox');
   groomActionBox.classList.toggle('hidden', !isGroomingAd(ad));
   document.getElementById('mBookGroomingBtn').onclick = () => {
     closeAdModal();
     openGroomingModal(ad);
+  };
+
+  const vetActionBox = document.getElementById('mVetActionBox');
+  vetActionBox.classList.toggle('hidden', !vetFlag);
+  document.getElementById('mBookVetBtn').onclick = () => {
+    closeAdModal();
+    openVetModal(ad);
   };
 
   document.getElementById('mSellerName').textContent = getSellerDisplayName(ad);
@@ -1790,6 +2334,7 @@ function applyFilters() {
     let matchesDeal = true;
     if (dealSel === 'shop') matchesDeal = isShopAd(x);
     else if (dealSel === 'grooming') matchesDeal = isGroomingAd(x);
+    else if (dealSel === 'vet') matchesDeal = isVetAd(x);
     else if (dealSel === 'free') matchesDeal = isFreeAd(x);
 
     const text = `${x.title || ''} ${x.desc || x.description || ''} ${x.city || ''}`.toLowerCase();
@@ -2188,7 +2733,7 @@ async function cancelShopOrder(idx) {
 async function loadMyAds() {
   if (!tg?.initData) {
     showMy();
-    await Promise.all([loadShopOrders(), loadGroomingBookings()]);
+    await Promise.all([loadShopOrders(), loadGroomingBookings(), loadVetAppointments()]);
     return;
   }
   try {
@@ -2476,10 +3021,14 @@ document.getElementById('publish').onclick = async () => {
   const channelsStr = profileState.channels.join(', ');
   const isShop = Boolean(document.getElementById('isShop')?.checked);
   const isGrooming = Boolean(document.getElementById('isGrooming')?.checked);
+  const isVet = Boolean(document.getElementById('isVet')?.checked);
 
   let groomingDates = [];
   let groomingTimes = [];
   let schedulePayload = {};
+  let vetDates = [];
+  let vetTimes = [];
+  let vetSchedulePayload = {};
 
   if (isGrooming) {
     const customDays = Object.keys(scheduleByDateDraft).filter(d => Array.isArray(scheduleByDateDraft[d]) && scheduleByDateDraft[d].length);
@@ -2495,6 +3044,23 @@ document.getElementById('publish').onclick = async () => {
     } else {
       groomingDates = parseSlotList(document.getElementById('groomDates')?.value, getGroomDates({}));
       groomingTimes = parseSlotList(document.getElementById('groomTimes')?.value, getGroomTimes({}));
+    }
+  }
+
+  if (isVet) {
+    const customVetDays = Object.keys(vetScheduleByDateDraft).filter(d => Array.isArray(vetScheduleByDateDraft[d]) && vetScheduleByDateDraft[d].length);
+    if (customVetDays.length) {
+      customVetDays.sort();
+      vetDates = customVetDays;
+      const allVT = [];
+      for (const d of customVetDays) {
+        vetSchedulePayload[d] = [...new Set(vetScheduleByDateDraft[d])];
+        allVT.push(...vetSchedulePayload[d]);
+      }
+      vetTimes = [...new Set(allVT)];
+    } else {
+      vetDates = parseSlotList(document.getElementById('vetDates')?.value, getVetDates({}));
+      vetTimes = parseSlotList(document.getElementById('vetTimes')?.value, getVetTimes({}));
     }
   }
 
@@ -2533,6 +3099,12 @@ document.getElementById('publish').onclick = async () => {
     grooming_dates: groomingDates,
     grooming_times: groomingTimes,
     grooming_schedule_by_date: schedulePayload,
+    is_vet: isVet,
+    vet_dates: vetDates,
+    vet_times: vetTimes,
+    vet_schedule_by_date: vetSchedulePayload,
+    owner_id: tgUser?.id ? String(tgUser.id) : undefined,
+    owner_username: tgUser?.username || '',
     seller_id: tgUser?.id ? String(tgUser.id) : undefined,
     seller_name: sellerName,
     seller_username: tgUser?.username || ''
@@ -2567,7 +3139,9 @@ document.getElementById('publish').onclick = async () => {
 
     selectedPhotos = [];
     scheduleByDateDraft = {};
+    vetScheduleByDateDraft = {};
     renderScheduleDraft();
+    renderVetScheduleDraft();
     document.getElementById('photos').value = '';
     renderThumbs();
     alert('Объявление опубликовано!');
