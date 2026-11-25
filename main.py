@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from urllib.parse import parse_qsl
@@ -18,6 +19,7 @@ FIREBASE_CREDENTIALS_JSON = os.environ.get("FIREBASE_CREDENTIALS_JSON", "").stri
 FIREBASE_CRED_PATH = os.environ.get(
     "FIREBASE_CRED_PATH", "zoomarket-121d2-firebase-adminsdk-fbsvc-ac9a0145b5.json"
 )
+ALLOW_UNVERIFIED_DEV = os.environ.get("ALLOW_UNVERIFIED_DEV", "").strip().lower() in ("1", "true", "yes")
 
 if not BOT_TOKEN:
     raise RuntimeError("Не задана переменная окружения BOT_TOKEN")
@@ -26,8 +28,10 @@ if not firebase_admin._apps:
     if FIREBASE_CREDENTIALS_JSON:
         cred_dict = json.loads(FIREBASE_CREDENTIALS_JSON)
         cred = credentials.Certificate(cred_dict)
-    else:
+    elif os.path.exists(FIREBASE_CRED_PATH):
         cred = credentials.Certificate(FIREBASE_CRED_PATH)
+    else:
+        cred = credentials.ApplicationDefault()
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -69,6 +73,8 @@ def parse_iso_dt(val: Any) -> Optional[datetime]:
 
 def verify_telegram_init_data(init_data: str, bot_token: str) -> dict:
     if not init_data:
+        if ALLOW_UNVERIFIED_DEV:
+            return {"id": "dev_user", "first_name": "Dev", "username": "dev_user"}
         raise HTTPException(status_code=401, detail="Missing initData")
 
     parsed = dict(parse_qsl(init_data, keep_blank_values=True))
@@ -170,9 +176,16 @@ def resolve_telegram_chat_id(
 
 
 def parse_price_number(price_val: Any) -> float:
-    cleaned = "".join(ch for ch in str(price_val or "") if ch.isdigit() or ch in ".,").replace(",", ".")
+    if isinstance(price_val, (int, float)):
+        return float(price_val) if float(price_val) >= 0 else 0.0
+    s = str(price_val or "").strip().lower()
+    if not s or "бесплат" in s or "даром" in s:
+        return 0.0
+    match = re.search(r"\d+(?:[.,]\d+)?", s.replace(" ", ""))
+    if not match:
+        return 0.0
     try:
-        return float(cleaned) if cleaned else 0.0
+        return float(match.group(0).replace(",", "."))
     except ValueError:
         return 0.0
 
@@ -180,9 +193,25 @@ def parse_price_number(price_val: Any) -> float:
 def format_price_string(price_val: Optional[str], currency_val: Optional[str]) -> str:
     p = (price_val or "").strip()
     c = (currency_val or "").strip()
+    if c.lower() == "бесплатно" and not p:
+        return "Бесплатно"
     if p and c and c.lower() not in p.lower():
         return f"{p} {c}".strip()
     return p or c
+
+
+def is_ad_owner(data: Dict[str, Any], user_id: Any, username: str = "") -> bool:
+    uid_str = str(user_id or "").strip()
+    uname_low = str(username or "").lstrip("@").strip().lower()
+    if uid_str:
+        for k in ("author_id", "owner_id", "seller_id"):
+            if str(data.get(k) or "").strip() == uid_str:
+                return True
+    if uname_low:
+        for k in ("author_username", "owner_username", "seller_username"):
+            if str(data.get(k) or "").lstrip("@").strip().lower() == uname_low:
+                return True
+    return False
 
 
 # --- Pydantic Models ---
@@ -446,6 +475,7 @@ def update_ad(
 ):
     tg_user = verify_telegram_init_data(x_telegram_init_data, BOT_TOKEN)
     user_id = tg_user.get("id")
+    uname = tg_user.get("username") or ""
 
     doc_ref = db.collection("ads").document(ad_id)
     snap = doc_ref.get()
@@ -453,7 +483,7 @@ def update_ad(
         raise HTTPException(status_code=404, detail="Ad not found")
 
     data = snap.to_dict() or {}
-    if str(data.get("author_id", "")) != str(user_id):
+    if not is_ad_owner(data, user_id, uname):
         raise HTTPException(status_code=403, detail="Forbidden: not the author")
 
     updates: Dict[str, Any] = {}
@@ -526,7 +556,8 @@ def boost_ad(
     x_telegram_init_data: str = Header(default=""),
 ):
     tg_user = verify_telegram_init_data(x_telegram_init_data, BOT_TOKEN)
-    user_id = str(tg_user.get("id") or "")
+    user_id = tg_user.get("id")
+    uname = tg_user.get("username") or ""
 
     doc_ref = db.collection("ads").document(ad_id)
     snap = doc_ref.get()
@@ -534,7 +565,7 @@ def boost_ad(
         raise HTTPException(status_code=404, detail="Ad not found")
 
     data = snap.to_dict() or {}
-    if str(data.get("author_id", "")) != user_id:
+    if not is_ad_owner(data, user_id, uname):
         raise HTTPException(status_code=403, detail="Forbidden: not the author")
 
     current_dt = now_utc()
@@ -569,6 +600,7 @@ def boost_ad(
 def delete_ad(ad_id: str, x_telegram_init_data: str = Header(default="")):
     tg_user = verify_telegram_init_data(x_telegram_init_data, BOT_TOKEN)
     user_id = tg_user.get("id")
+    uname = tg_user.get("username") or ""
 
     doc_ref = db.collection("ads").document(ad_id)
     snap = doc_ref.get()
@@ -576,7 +608,7 @@ def delete_ad(ad_id: str, x_telegram_init_data: str = Header(default="")):
         raise HTTPException(status_code=404, detail="Ad not found")
 
     data = snap.to_dict() or {}
-    if str(data.get("author_id", "")) != str(user_id):
+    if not is_ad_owner(data, user_id, uname):
         raise HTTPException(status_code=403, detail="Forbidden: not the author")
 
     doc_ref.delete()
@@ -1218,8 +1250,7 @@ def dispatch_notification(payload: NotificationDispatchBody):
             f"Статус: {data.get('status', '')}",
         ]
 
-    message_text = "
-".join(line for line in lines if line.strip())
+    message_text = "\n".join(line for line in lines if line.strip())
     sent = False
     if target_chat and message_text:
         sent = send_telegram_message(target_chat, message_text)
