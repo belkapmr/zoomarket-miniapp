@@ -1,85 +1,30 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ЗооМаркет</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{--bg:#08111f;--panel:#132238;--panel2:#1b304a;--line:#223b5a;--muted:#9aacc0;--yellow:#ffc900;--green:#36d98a;--purple:#6d52bb;--danger:#e5484d;--white:#f4f7fb}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--white);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:88px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:88px}
 header{padding:18px 18px 10px;position:sticky;top:0;background:rgba(8,17,31,.96);z-index:5;border-bottom:1px solid #172b43;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{width:48px;height:48px;border-radius:15px;background:var(--yellow);display:grid;place-items:center;font-size:27px}
-.brand h1{font-size:21px;margin:0}
-.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:15px;background:var(--yellow);display:grid;place-items:center;font-size:27px}.brand h1{font-size:21px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
 .cart-top-btn{background:var(--panel2);color:var(--yellow);border:1px solid var(--line);border-radius:14px;padding:10px 13px;font-size:14px;font-weight:800;white-space:nowrap}
-main{padding:16px}
-.tabs{display:flex;gap:8px;overflow:auto;margin:8px 0 12px}
-.chip{border:1px solid var(--line);background:var(--panel);color:#bdc9d8;padding:10px 15px;border-radius:24px;white-space:nowrap;font-weight:600}
-.chip.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
-.searchbox,.card,.field,.preview{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:15px;margin-bottom:13px}
-.searchbox input{background:none;border:0;color:white;font-size:16px;width:100%;outline:0}
-.sectiontitle{font-size:13px;color:var(--muted);font-weight:800;letter-spacing:1px;margin:22px 0 12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center;cursor:pointer}
-.category .emoji{font-size:30px}
-.category b{display:block;margin-top:7px}
-.listing{display:flex;gap:12px;cursor:pointer;transition:transform .12s ease,border-color .12s ease;position:relative}
-.listing.is-boosted{border-color:var(--yellow);box-shadow:0 0 0 1px rgba(255,201,0,.22)}
-.listing:active,.my-card:active{transform:scale(.99);border-color:var(--yellow)}
-.my-card{cursor:pointer;transition:transform .12s ease,border-color .12s ease}
-.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px;overflow:hidden}
-.photo img{width:100%;height:100%;object-fit:cover;display:block}
-.listing>div:last-child{min-width:0;flex:1}
-.listing h3{font-size:16px;margin:2px 0 7px}
-.muted{color:var(--muted);font-size:13px;line-height:1.45}
-.price{color:var(--yellow);font-weight:800;margin-top:8px}
-.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}
-.shop-badge{display:inline-block;background:#2b2308;color:var(--yellow);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}
-.groom-badge{display:inline-block;background:#1d1938;color:#c2b2ff;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}
-.boost-badge{display:inline-block;background:var(--yellow);color:#111;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:900;margin-bottom:7px;margin-right:6px}
-.soldout-badge{display:inline-block;background:#3a171c;color:#ff9ea2;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}
-.hidden-badge{display:inline-block;background:#2c2a14;color:#ffd84d;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}
-button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}
-.primary{background:var(--yellow);color:#111;width:100%}
-.secondary{background:var(--panel2);color:white;border:1px solid var(--line)}
-.danger-btn{background:#3a171c;color:#ff9ea2;border:1px solid #6b252e}
-.success-btn{background:#103b2d;color:var(--green);border:1px solid #1f6b52}
-.boost-btn{background:#332700;color:var(--yellow);border:1px solid #8a6b00}
-.boost-btn:disabled{opacity:.48;cursor:not-allowed}
-.small-btn{padding:10px 14px;font-size:13px;border-radius:12px}
-.my-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.fav-btn{background:var(--panel2);color:#ff9ea2;border:1px solid var(--line);border-radius:12px;padding:7px 11px;font-size:14px;line-height:1;flex-shrink:0}
-.fav-btn.active{background:#3a171c;border-color:#e5484d;color:#ff6b70}
-.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
-.field input,.field textarea,.field select{width:100%;background:transparent;border:0;outline:0;color:white;font:16px inherit}
-.field textarea{min-height:90px;resize:vertical}
-.field select option{background:var(--panel)}
-.check-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 15px;margin-bottom:13px;cursor:pointer}
-.check-row input{width:20px;height:20px;accent-color:var(--yellow)}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.row>*{flex:1;min-width:140px}
-.bottom{position:fixed;bottom:0;left:0;right:0;background:#0b1728;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:10}
-.nav{background:none;color:var(--muted);padding:5px 4px;font-size:11px;flex:1}
-.nav span{display:block;font-size:23px;margin-bottom:3px}
-.nav.active{color:var(--yellow)}
-.hidden{display:none!important}
-.empty{text-align:center;padding:45px 15px;color:var(--muted)}
-.empty strong{display:block;color:white;font-size:19px;margin:10px}
-.preview{border-style:dashed}
-.preview pre{white-space:pre-wrap;color:#c5d0de;font:14px/1.5 inherit;margin:8px 0}
-.photoadd{border:1px dashed #45617f;border-radius:15px;padding:18px;text-align:center;color:var(--muted)}
-.thumbs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-.thumbs img{width:68px;height:68px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
-.notice{font-size:12px;color:var(--muted);line-height:1.5;margin:10px 2px}
+main{padding:16px}.tabs{display:flex;gap:8px;overflow:auto;margin:8px 0 12px}.chip{border:1px solid var(--line);background:var(--panel);color:#bdc9d8;padding:10px 15px;border-radius:24px;white-space:nowrap;font-weight:600}.chip.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
+.searchbox,.card,.field,.preview{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:15px;margin-bottom:13px}.searchbox input{background:none;border:0;color:white;font-size:16px;width:100%;outline:0}.sectiontitle{font-size:13px;color:var(--muted);font-weight:800;letter-spacing:1px;margin:22px 0 12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center;cursor:pointer}.category .emoji{font-size:30px}.category b{display:block;margin-top:7px}.listing{display:flex;gap:12px;cursor:pointer;transition:transform .12s ease,border-color .12s ease;position:relative}.listing.is-boosted{border-color:var(--yellow);box-shadow:0 0 0 1px rgba(255,201,0,.22)}.listing:active,.my-card:active{transform:scale(.99);border-color:var(--yellow)}.my-card{cursor:pointer;transition:transform .12s ease,border-color .12s ease}.photo{width:100px;height:100px;flex-shrink:0;border-radius:15px;background:#213852;display:grid;place-items:center;font-size:42px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover;display:block}.listing>div:last-child{min-width:0;flex:1}.listing h3{font-size:16px;margin:2px 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.price{color:var(--yellow);font-weight:800;margin-top:8px}.tag{display:inline-block;background:#103b2d;color:var(--green);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}.shop-badge{display:inline-block;background:#2b2308;color:var(--yellow);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}.groom-badge{display:inline-block;background:#1d1938;color:#c2b2ff;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}.boost-badge{display:inline-block;background:var(--yellow);color:#111;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:900;margin-bottom:7px;margin-right:6px}.soldout-badge{display:inline-block;background:#3a171c;color:#ff9ea2;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}.hidden-badge{display:inline-block;background:#2c2a14;color:#ffd84d;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}
+button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:var(--yellow);color:#111;width:100%}.secondary{background:var(--panel2);color:white;border:1px solid var(--line)}.danger-btn{background:#3a171c;color:#ff9ea2;border:1px solid #6b252e}.success-btn{background:#103b2d;color:var(--green);border:1px solid #1f6b52}.boost-btn{background:#332700;color:var(--yellow);border:1px solid #8a6b00}.boost-btn:disabled{opacity:.48;cursor:not-allowed}.small-btn{padding:10px 14px;font-size:13px;border-radius:12px}.my-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.fav-btn{background:var(--panel2);color:#ff9ea2;border:1px solid var(--line);border-radius:12px;padding:7px 11px;font-size:14px;line-height:1;flex-shrink:0}.fav-btn.active{background:#3a171c;border-color:#e5484d;color:#ff6b70}
+.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}.field input,.field textarea,.field select{width:100%;background:transparent;border:0;outline:0;color:white;font:16px inherit}.field textarea{min-height:90px;resize:vertical}.field select option{background:var(--panel)}
+.check-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 15px;margin-bottom:13px;cursor:pointer}.check-row input{width:20px;height:20px;accent-color:var(--yellow)}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:140px}.bottom{position:fixed;bottom:0;left:0;right:0;background:#0b1728;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:10}.nav{background:none;color:var(--muted);padding:5px 4px;font-size:11px;flex:1}.nav span{display:block;font-size:23px;margin-bottom:3px}.nav.active{color:var(--yellow)}
+.hidden{display:none!important}.empty{text-align:center;padding:45px 15px;color:var(--muted)}.empty strong{display:block;color:white;font-size:19px;margin:10px}.preview{border-style:dashed}.preview pre{white-space:pre-wrap;color:#c5d0de;font:14px/1.5 inherit;margin:8px 0}
+.photoadd{border:1px dashed #45617f;border-radius:15px;padding:18px;text-align:center;color:var(--muted)}.thumbs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}.thumbs img{width:68px;height:68px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.notice{font-size:12px;color:var(--muted);line-height:1.5;margin:10px 2px}
 
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center;z-index:30}
 .modal-bg.open{display:flex}
 .modal-box{width:100%;max-width:640px;max-height:88vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px 24px 0 0;padding:20px 18px 28px}
-.modal-photos{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}
-.modal-photos img{width:150px;height:150px;object-fit:cover;border-radius:14px;flex-shrink:0}
+.modal-photos{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}.modal-photos img{width:150px;height:150px;object-fit:cover;border-radius:14px;flex-shrink:0}
 .modal-title{margin:6px 0 8px;font-size:20px}
 .modal-price{color:var(--yellow);font-size:18px;font-weight:800;margin-bottom:12px}
 .modal-line{margin-bottom:10px;line-height:1.5;font-size:15px}
@@ -128,133 +73,119 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
 .vet-badge{display:inline-block;background:#103842;color:#6ce5ff;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;margin-bottom:7px;margin-right:6px}
 .qty-select-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .qty-select-row .qty-box{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:6px 10px}
-</style>
-</head>
+</style></head>
 <body>
 <header>
-  <div class="brand">
-    <div class="logo">🐾</div>
-    <div><h1>ЗооМаркет</h1><p>Животные · товары · услуги</p></div>
-  </div>
+  <div class="brand"><div class="logo">🐾</div><div><h1>ЗооМаркет</h1><p>Животные · товары · услуги</p></div></div>
   <button type="button" class="cart-top-btn" id="openCartBtn">🛒 Корзина (<span id="cartCount">0</span>)</button>
 </header>
-
 <main>
 <section id="home">
-  <div class="searchbox"><input id="search" placeholder="🔎 Найти животное, товар или услугу"></div>
+<div class="searchbox"><input id="search" placeholder="🔎 Найти животное, товар или услугу"></div>
 
-  <div class="row" style="margin-bottom:10px">
-    <div class="field" style="margin-bottom:0">
-      <label for="cityFilter">Город</label>
-      <select id="cityFilter">
-        <option value="">Все города</option>
-        <option value="Тирасполь">Тирасполь</option>
-        <option value="Бендеры">Бендеры</option>
-        <option value="Слободзея">Слободзея</option>
-        <option value="Рыбница">Рыбница</option>
-        <option value="Дубоссары">Дубоссары</option>
-        <option value="Кишинёв">Кишинёв</option>
-      </select>
-    </div>
-    <div class="field" style="margin-bottom:0">
-      <label for="dealFilter">Тип сделки</label>
-      <select id="dealFilter">
-        <option value="all">Все сделки</option>
-        <option value="shop">Только магазин</option>
-        <option value="grooming">Только груминг</option>
-        <option value="vet">Только ветеринары</option>
-        <option value="free">Отдам даром</option>
-      </select>
-    </div>
+<div class="row" style="margin-bottom:10px">
+  <div class="field" style="margin-bottom:0">
+    <label for="cityFilter">Город</label>
+    <select id="cityFilter">
+      <option value="">Все города</option>
+      <option value="Тирасполь">Тирасполь</option>
+      <option value="Бендеры">Бендеры</option>
+      <option value="Слободзея">Слободзея</option>
+      <option value="Рыбница">Рыбница</option>
+      <option value="Дубоссары">Дубоссары</option>
+      <option value="Кишинёв">Кишинёв</option>
+    </select>
   </div>
-
-  <div class="tabs">
-    <button class="chip active" data-filter="Все">Все</button>
-    <button class="chip" data-filter="Животные">Животные</button>
-    <button class="chip" data-filter="Товары">Товары</button>
-    <button class="chip" data-filter="Услуги">Услуги</button>
+  <div class="field" style="margin-bottom:0">
+    <label for="dealFilter">Тип сделки</label>
+    <select id="dealFilter">
+      <option value="all">Все сделки</option>
+      <option value="shop">Только магазин</option>
+      <option value="grooming">Только груминг</option>
+      <option value="vet">Только ветеринары</option>
+      <option value="free">Отдам даром</option>
+    </select>
   </div>
+</div>
 
-  <div class="sectiontitle">КАТЕГОРИИ</div>
-  <div class="grid">
-    <div class="category" data-cat="Животные"><div class="emoji">🐶</div><b>Животные</b></div>
-    <div class="category" data-cat="Товары"><div class="emoji">🛍️</div><b>Зоотовары</b></div>
-    <div class="category" data-cat="Услуги"><div class="emoji">🩺</div><b>Ветуслуги</b></div>
-    <div class="category" data-cat="Услуги"><div class="emoji">✂️</div><b>Груминг</b></div>
-  </div>
-
-  <div class="sectiontitle">ПОСЛЕДНИЕ ОБЪЯВЛЕНИЯ</div>
-  <div id="listings"></div>
+<div class="tabs">
+  <button class="chip active" data-filter="Все">Все</button>
+  <button class="chip" data-filter="Животные">Животные</button>
+  <button class="chip" data-filter="Товары">Товары</button>
+  <button class="chip" data-filter="Услуги">Услуги</button>
+</div>
+<div class="sectiontitle">КАТЕГОРИИ</div>
+<div class="grid">
+<div class="category" data-cat="Животные"><div class="emoji">🐶</div><b>Животные</b></div>
+<div class="category" data-cat="Товары"><div class="emoji">🛍️</div><b>Зоотовары</b></div>
+<div class="category" data-cat="Услуги"><div class="emoji">🩺</div><b>Ветуслуги</b></div>
+<div class="category" data-cat="Услуги"><div class="emoji">✂️</div><b>Груминг</b></div>
+</div>
+<div class="sectiontitle">ПОСЛЕДНИЕ ОБЪЯВЛЕНИЯ</div><div id="listings"></div>
 </section>
-
 <section id="create" class="hidden">
-  <h2>Разместить объявление</h2>
-  <p class="muted">Заполните информацию — объявление сразу появится в ленте.</p>
+<h2>Разместить объявление</h2><p class="muted">Заполните информацию — объявление сразу появится в ленте.</p>
+<label class="check-row"><input type="checkbox" id="isShop"><span><b>🏪 Это магазин</b><span class="muted" style="display:block">Покупатели смогут добавить товар/услугу в корзину и оформить заказ</span></span></label>
+<label class="check-row"><input type="checkbox" id="isGrooming"><span><b>✂️ Это груминг (запись по слотам)</b><span class="muted" style="display:block">Клиенты выберут дату, свободное время и опишут питомца и процедуры</span></span></label>
 
-  <label class="check-row"><input type="checkbox" id="isShop"><span><b>🏪 Это магазин</b><span class="muted" style="display:block">Покупатели смогут добавить товар/услугу в корзину и оформить заказ</span></span></label>
-  <label class="check-row"><input type="checkbox" id="isGrooming"><span><b>✂️ Это груминг (запись по слотам)</b><span class="muted" style="display:block">Клиенты выберут дату, свободное время и опишут питомца и процедуры</span></span></label>
-
-  <div id="groomingMasterBox" class="hidden">
-    <div class="field">
-      <label for="groomDayPicker">Гибкое расписание по дням — выберите дату и добавьте часы</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input id="groomDayPicker" type="date" style="flex:1;min-width:150px">
-        <button type="button" class="secondary small-btn" id="addGroomDayBtn">+ Добавить день</button>
-      </div>
-    </div>
-    <div id="groomScheduleDaysBox"></div>
-
-    <div class="field">
-      <label for="groomDates">Общие даты (если не заданы по дням, через запятую)</label>
-      <input id="groomDates" placeholder="Например: 2026-11-23, 2026-11-24">
-    </div>
-    <div class="field">
-      <label for="groomTimes">Общее время на эти даты (через запятую)</label>
-      <input id="groomTimes" placeholder="Например: 10:00, 12:30, 15:00, 17:30">
+<div id="groomingMasterBox" class="hidden">
+  <div class="field">
+    <label for="groomDayPicker">Гибкое расписание по дням — выберите дату и добавьте часы</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input id="groomDayPicker" type="date" style="flex:1;min-width:150px">
+      <button type="button" class="secondary small-btn" id="addGroomDayBtn">+ Добавить день</button>
     </div>
   </div>
+  <div id="groomScheduleDaysBox"></div>
 
-  <label class="check-row"><input type="checkbox" id="isVet"><span><b>🩺 Это приём ветеринара</b><span class="muted" style="display:block">Укажите свободные дни и время приёма — владельцы животных смогут записаться</span></span></label>
+  <div class="field">
+    <label for="groomDates">Общие даты (если не заданы по дням, через запятую)</label>
+    <input id="groomDates" placeholder="Например: 2026-11-23, 2026-11-24">
+  </div>
+  <div class="field">
+    <label for="groomTimes">Общее время на эти даты (через запятую)</label>
+    <input id="groomTimes" placeholder="Например: 10:00, 12:30, 15:00, 17:30">
+  </div>
+</div>
 
-  <div id="vetDoctorBox" class="hidden">
-    <div class="field">
-      <label for="vetDayPicker">Свободные дни и часы приёма по дням</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input id="vetDayPicker" type="date" style="flex:1;min-width:150px">
-        <button type="button" class="secondary small-btn" id="addVetDayBtn">+ Добавить день</button>
-      </div>
-    </div>
-    <div id="vetScheduleDaysBox"></div>
+<label class="check-row"><input type="checkbox" id="isVet"><span><b>🩺 Это приём ветеринара</b><span class="muted" style="display:block">Укажите свободные дни и время приёма — владельцы животных смогут записаться</span></span></label>
 
-    <div class="field">
-      <label for="vetDates">Общие свободные дни приёма (через запятую)</label>
-      <input id="vetDates" placeholder="Например: 2026-11-26, 2026-11-27">
-    </div>
-    <div class="field">
-      <label for="vetTimes">Общее свободное время приёма (через запятую)</label>
-      <input id="vetTimes" placeholder="Например: 09:30, 11:00, 14:00, 16:30">
+<div id="vetDoctorBox" class="hidden">
+  <div class="field">
+    <label for="vetDayPicker">Свободные дни и часы приёма по дням</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input id="vetDayPicker" type="date" style="flex:1;min-width:150px">
+      <button type="button" class="secondary small-btn" id="addVetDayBtn">+ Добавить день</button>
     </div>
   </div>
+  <div id="vetScheduleDaysBox"></div>
 
-  <div class="field"><label>Что размещаем?</label><select id="kind"><option>Животное</option><option>Зоотовар</option><option>Услуга</option><option>Отдам даром</option><option>Ищу</option></select></div>
-  <div class="field"><label>Название объявления</label><input id="title" placeholder="Например: Щенки корги / Груминг собак"></div>
-  <div class="field"><label>Категория</label><select id="category"><option>Животные</option><option>Товары</option><option>Услуги</option></select></div>
-  <div class="row">
-    <div class="field"><label>Цена</label><input id="price" placeholder="Например: 500"></div>
-    <div class="field"><label>Валюта</label><select id="currency"><option>руб.</option><option>лей</option><option>€</option><option>$</option><option>Бесплатно</option></select></div>
+  <div class="field">
+    <label for="vetDates">Общие свободные дни приёма (через запятую)</label>
+    <input id="vetDates" placeholder="Например: 2026-11-26, 2026-11-27">
   </div>
-  <div class="field"><label>Количество в наличии (шт.)</label><input id="stock" type="number" min="0" step="1" value="1" placeholder="Например: 5"></div>
-  <div class="field"><label>Город</label><input id="city" placeholder="Тирасполь, Бендеры..."></div>
-  <div class="field"><label>Описание</label><textarea id="description" placeholder="Расскажите подробнее..."></textarea></div>
-  <div class="field"><label>Контактный телефон</label><input id="phone" placeholder="+373..."></div>
-  <div class="field"><label>Как связаться?</label><select id="contact"><option>Telegram</option><option>Viber</option><option>WhatsApp</option><option>Телефон</option></select></div>
-  <div class="photoadd">📷 Добавить фотографии (до 3)<input id="photos" type="file" accept="image/*" multiple style="display:block;margin:12px auto 0;max-width:100%"><div class="thumbs" id="photoThumbs"></div></div>
-  <div class="sectiontitle">ПРЕДПРОСМОТР</div>
-  <div class="preview" id="preview">Заполните название и описание — здесь появится ваш текст.</div>
-  <button class="primary" id="publish">📣 Опубликовать</button>
-  <p class="notice">Объявления сохраняются на сервере и публикуются в общей ленте.</p>
+  <div class="field">
+    <label for="vetTimes">Общее свободное время приёма (через запятую)</label>
+    <input id="vetTimes" placeholder="Например: 09:30, 11:00, 14:00, 16:30">
+  </div>
+</div>
+
+<div class="field"><label>Что размещаем?</label><select id="kind"><option>Животное</option><option>Зоотовар</option><option>Услуга</option><option>Отдам даром</option><option>Ищу</option></select></div>
+<div class="field"><label>Название объявления</label><input id="title" placeholder="Например: Щенки корги / Груминг собак"></div>
+<div class="field"><label>Категория</label><select id="category"><option>Животные</option><option>Товары</option><option>Услуги</option></select></div>
+<div class="row">
+  <div class="field"><label>Цена</label><input id="price" placeholder="Например: 500"></div>
+  <div class="field"><label>Валюта</label><select id="currency"><option>руб.</option><option>лей</option><option>€</option><option>$</option><option>Бесплатно</option></select></div>
+</div>
+<div class="field"><label>Количество в наличии (шт.)</label><input id="stock" type="number" min="0" step="1" value="1" placeholder="Например: 5"></div>
+<div class="field"><label>Город</label><input id="city" placeholder="Тирасполь, Бендеры..."></div>
+<div class="field"><label>Описание</label><textarea id="description" placeholder="Расскажите подробнее..."></textarea></div>
+<div class="field"><label>Контактный телефон</label><input id="phone" placeholder="+373..."></div>
+<div class="field"><label>Как связаться?</label><select id="contact"><option>Telegram</option><option>Viber</option><option>WhatsApp</option><option>Телефон</option></select></div>
+<div class="photoadd">📷 Добавить фотографии (до 3)<input id="photos" type="file" accept="image/*" multiple style="display:block;margin:12px auto 0;max-width:100%"><div class="thumbs" id="photoThumbs"></div></div>
+<div class="sectiontitle">ПРЕДПРОСМОТР</div><div class="preview" id="preview">Заполните название и описание — здесь появится ваш текст.</div>
+<button class="primary" id="publish">📣 Опубликовать</button><p class="notice">Объявления сохраняются на сервере и публикуются в общей ленте.</p>
 </section>
-
 <section id="my" class="hidden">
   <h2>Мои объявления</h2>
   <p class="notice">Бесплатное поднятие закрепляет объявление вверху ленты на 24 часа и доступно 1 раз в 24 часа.</p>
@@ -266,11 +197,7 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
   <div class="sectiontitle">ЗАКАЗЫ МАГАЗИНА</div>
   <div id="shopOrdersList" class="muted">Загрузка заказов...</div>
 </section>
-
-<section id="saved" class="hidden">
-  <h2>Избранное</h2>
-  <div id="savedlist" class="empty">❤️ Здесь будут сохранённые объявления.</div>
-</section>
+<section id="saved" class="hidden"><h2>Избранное</h2><div id="savedlist" class="empty">❤️ Здесь будут сохранённые объявления.</div></section>
 
 <section id="profile" class="hidden">
   <h2>Профиль</h2>
@@ -584,29 +511,24 @@ button{border:0;border-radius:15px;padding:14px 16px;font-size:16px;font-weight:
     <div class="field"><label>Телефон</label><input id="ePhone"></div>
     <div class="field"><label>Как связаться?</label><select id="eContact"><option>Telegram</option><option>Viber</option><option>WhatsApp</option><option>Телефон</option></select></div>
     <div class="modal-btns">
-      <button class="secondary" onclick="closeEditModal()">Отмена</button>
-      <button class="primary" id="saveEditBtn">💾 Сохранить</button>
+      <button type="button" class="secondary" onclick="closeEditModal()">Отмена</button>
+      <button type="button" class="primary" id="saveEditBtn">💾 Сохранить</button>
     </div>
   </div>
 </div>
 
 <nav class="bottom">
-  <button class="nav active" data-page="home"><span>🔎</span>Поиск</button>
-  <button class="nav" data-page="create"><span>📣</span>Разместить</button>
-  <button class="nav" data-page="my"><span>📋</span>Мои</button>
-  <button class="nav" data-page="saved"><span>❤️</span>Избранное</button>
-  <button class="nav" data-page="profile"><span>👤</span>Профиль</button>
+<button class="nav active" data-page="home"><span>🔎</span>Поиск</button>
+<button class="nav" data-page="create"><span>📣</span>Разместить</button>
+<button class="nav" data-page="my"><span>📋</span>Мои</button>
+<button class="nav" data-page="saved"><span>❤️</span>Избранное</button>
+<button class="nav" data-page="profile"><span>👤</span>Профиль</button>
 </nav>
-
 <script>
-const DEFAULT_API_URL = "https://conversation-discusses-sussex-gay.trycloudflare.com";
-const urlParamsApi = new URLSearchParams(window.location.search).get("api");
-const API_URL = (urlParamsApi || localStorage.getItem("zoomarket_api_url") || DEFAULT_API_URL).replace(/\/+$/, "");
-
+const API_URL = "https://conversation-discusses-sussex-gay.trycloudflare.com";
 const CART_KEY = "zoomarket_shop_cart_v1";
 const SAVED_KEY = "zoomarket_saved_ads_v1";
 const FREE_BOOST_KEY = "zoomarket_free_boosts_v1";
-const ZM_PROFILE_KEY = "zoomarket_profile_v1";
 const BOOST_DURATION_MS = 24 * 60 * 60 * 1000;
 const BOOST_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
@@ -646,18 +568,6 @@ let takenVetSlots = [];
 let vetScheduleByDateDraft = {};
 let modalSelectedQty = 1;
 
-let profileState = {
-  role: "ИЩУ / ПОКУПАЮ",
-  name: "",
-  phone: "",
-  channels: ["Telegram"],
-  notifications: {
-    new_ads: true,
-    orders_and_grooming: true,
-    stock_and_boost: true
-  }
-};
-
 function esc(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -680,38 +590,12 @@ function authHeaders() {
   return headers;
 }
 
-function getSellerKey(ad) {
-  return String(ad?.seller_id || ad?.shop_id || ad?.author_id || ad?.user_id || ad?.phone || ad?.id || ad?.title || 'unknown');
-}
-
-function getSellerDisplayName(ad) {
-  return ad?.shop_name || ad?.seller_name || ad?.author_name || ad?.username || 'Мастер / Продавец';
-}
-
-function getOwnerTelegramTarget(ad) {
-  const rawUserId = ad?.seller_id || ad?.shop_id || ad?.groomer_id || ad?.vet_id || ad?.author_id || ad?.user_id || '';
-  const cleanId = /^\d+$/.test(String(rawUserId || '').trim()) ? String(rawUserId).trim() : '';
-  const rawUsername = ad?.seller_username || ad?.username || ad?.tg_username || ad?.owner_username || '';
-  const cleanUsername = String(rawUsername || '').replace(/^@/, '').trim();
-  return {
-    owner_id: cleanId,
-    owner_username: cleanUsername,
-    owner_name: getSellerDisplayName(ad)
-  };
-}
-
-function parsePriceNum(priceVal) {
-  if (typeof priceVal === 'number') return Number.isFinite(priceVal) && priceVal >= 0 ? priceVal : 0;
-  const s = String(priceVal || '').trim().toLowerCase();
-  if (!s || s.includes('бесплат') || s.includes('даром')) return 0;
-  const match = s.replace(/\s+/g, '').match(/\d+(?:[.,]\d+)?/);
-  if (!match) return 0;
-  const num = parseFloat(match[0].replace(',', '.'));
-  return Number.isFinite(num) ? num : 0;
-}
-
 function isShopAd(ad) {
-  return Boolean(ad?.is_shop || ad?.shop || ad?.shop_mode);
+  if (ad?.is_shop === true || ad?.shop === true || ad?.shop_mode === true) return true;
+  if (String(ad?.is_shop || '').toLowerCase() === 'true') return true;
+  if (ad?.shop_name && String(ad.shop_name).trim()) return true;
+  const text = `${ad?.title || ''} ${ad?.description || ''} ${ad?.desc || ''}`.toLowerCase();
+  return text.includes('[🏪 магазин]') || text.includes('это магазин');
 }
 
 function isGroomingAd(ad) {
@@ -748,11 +632,30 @@ function getAdKey(ad) {
   return String(ad?.id || `${ad?.title || ''}_${ad?.created_at || ''}`);
 }
 
-function parseSlotList(val, fallbackList) {
-  const raw = String(val || '').trim();
-  if (!raw) return fallbackList;
-  const parts = raw.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
-  return parts.length ? [...new Set(parts)] : fallbackList;
+function getSellerKey(ad) {
+  return String(ad?.seller_id || ad?.shop_id || ad?.author_id || ad?.user_id || ad?.phone || ad?.id || ad?.title || 'unknown');
+}
+
+function getSellerDisplayName(ad) {
+  return ad?.shop_name || ad?.seller_name || ad?.author_name || ad?.username || 'Мастер / Продавец';
+}
+
+function getOwnerTelegramTarget(ad) {
+  const rawUserId = ad?.seller_id || ad?.shop_id || ad?.groomer_id || ad?.vet_id || ad?.author_id || ad?.user_id || '';
+  const cleanId = /^\d+$/.test(String(rawUserId || '').trim()) ? String(rawUserId).trim() : '';
+  const rawUsername = ad?.seller_username || ad?.username || ad?.tg_username || ad?.owner_username || '';
+  const cleanUsername = String(rawUsername || '').replace(/^@/, '').trim();
+  return {
+    owner_id: cleanId,
+    owner_username: cleanUsername,
+    owner_name: getSellerDisplayName(ad)
+  };
+}
+
+function parsePriceNum(priceVal) {
+  const cleaned = String(priceVal || '').replace(/[^\d.,]/g, '').replace(',', '.');
+  const num = parseFloat(cleaned);
+  return Number.isFinite(num) ? num : 0;
 }
 
 async function sendTelegramNotification(eventType, data = {}) {
@@ -1032,7 +935,100 @@ function contactPerson({ phone = '', username = '', userId = '', label = 'кон
   alert(`Контакт (${label}) не указан.`);
 }
 
-/* --- Vet schedule & modal --- */
+function parseSlotList(val, fallbackList) {
+  const raw = String(val || '').trim();
+  if (!raw) return fallbackList;
+  const parts = raw.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+  return parts.length ? [...new Set(parts)] : fallbackList;
+}
+
+/* --- ГРУМИНГ --- */
+function getScheduleMap(ad) {
+  const map = ad?.grooming_schedule_by_date;
+  if (map && typeof map === 'object' && !Array.isArray(map)) {
+    const clean = {};
+    for (const [dt, times] of Object.entries(map)) {
+      if (dt && Array.isArray(times) && times.length) {
+        clean[String(dt)] = times.map(String);
+      }
+    }
+    if (Object.keys(clean).length) return clean;
+  }
+  return null;
+}
+
+function getGroomDates(ad) {
+  const map = getScheduleMap(ad);
+  if (map) return Object.keys(map).sort();
+  if (Array.isArray(ad?.grooming_dates) && ad.grooming_dates.length) return ad.grooming_dates;
+  const today = new Date().toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  return [today, tomorrow];
+}
+
+function getGroomTimes(ad) {
+  if (Array.isArray(ad?.grooming_times) && ad.grooming_times.length) return ad.grooming_times;
+  return ['10:00', '12:00', '14:30', '17:00'];
+}
+
+function getGroomTimesForDate(ad, dateStr) {
+  const map = getScheduleMap(ad);
+  if (map && dateStr && Array.isArray(map[dateStr]) && map[dateStr].length) return map[dateStr];
+  if (Array.isArray(ad?.grooming_times) && ad.grooming_times.length) return ad.grooming_times;
+  return ['10:00', '12:00', '14:30', '17:00'];
+}
+
+function renderScheduleDraft() {
+  const box = document.getElementById('groomScheduleDaysBox');
+  if (!box) return;
+  const dates = Object.keys(scheduleByDateDraft).sort();
+  if (!dates.length) {
+    box.innerHTML = '';
+    return;
+  }
+  box.innerHTML = dates.map(dt => {
+    const timesStr = (scheduleByDateDraft[dt] || []).join(', ');
+    return `<div class="sched-day-card">
+      <div class="sched-day-top">
+        <b>📅 ${esc(dt)}</b>
+        <button type="button" class="danger-btn small-btn" onclick="removeScheduleDay('${esc(dt)}')">Удалить день</button>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Часы на ${esc(dt)} (через запятую)</label>
+        <input type="text" value="${esc(timesStr)}" placeholder="10:00, 12:00, 15:00" oninput="updateScheduleDayTimes('${esc(dt)}', this.value)">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addScheduleDay() {
+  const picker = document.getElementById('groomDayPicker');
+  const dt = picker?.value;
+  if (!dt) {
+    alert('Выберите дату');
+    return;
+  }
+  if (!scheduleByDateDraft[dt]) {
+    scheduleByDateDraft[dt] = ['10:00', '12:30', '15:00'];
+  }
+  renderScheduleDraft();
+  updatePreview();
+}
+
+function updateScheduleDayTimes(dt, val) {
+  scheduleByDateDraft[dt] = parseSlotList(val, []);
+  updatePreview();
+}
+
+function removeScheduleDay(dt) {
+  delete scheduleByDateDraft[dt];
+  renderScheduleDraft();
+  updatePreview();
+}
+
+document.getElementById('addGroomDayBtn')?.addEventListener('click', addScheduleDay);
+
+/* --- ВЕТЕРИНАР --- */
 function getVetScheduleMap(ad) {
   const map = ad?.vet_schedule_by_date;
   if (map && typeof map === 'object' && !Array.isArray(map)) {
@@ -1391,262 +1387,7 @@ async function updateVetAppointmentStatus(idx, status) {
   }
 }
 
-/* --- Grooming schedule & modal --- */
-function getScheduleMap(ad) {
-  const map = ad?.grooming_schedule_by_date;
-  if (map && typeof map === 'object' && !Array.isArray(map)) {
-    const clean = {};
-    for (const [dt, times] of Object.entries(map)) {
-      if (dt && Array.isArray(times) && times.length) {
-        clean[String(dt)] = times.map(String);
-      }
-    }
-    if (Object.keys(clean).length) return clean;
-  }
-  return null;
-}
-
-function getGroomDates(ad) {
-  const map = getScheduleMap(ad);
-  if (map) return Object.keys(map).sort();
-  if (Array.isArray(ad?.grooming_dates) && ad.grooming_dates.length) {
-    return ad.grooming_dates;
-  }
-  const today = new Date().toISOString().slice(0, 10);
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-  return [today, tomorrow];
-}
-
-function getGroomTimes(ad) {
-  if (Array.isArray(ad?.grooming_times) && ad.grooming_times.length) {
-    return ad.grooming_times;
-  }
-  return ['10:00', '12:00', '14:30', '17:00'];
-}
-
-function getGroomTimesForDate(ad, dateStr) {
-  const map = getScheduleMap(ad);
-  if (map && dateStr && Array.isArray(map[dateStr]) && map[dateStr].length) {
-    return map[dateStr];
-  }
-  if (Array.isArray(ad?.grooming_times) && ad.grooming_times.length) {
-    return ad.grooming_times;
-  }
-  return ['10:00', '12:00', '14:30', '17:00'];
-}
-
-function renderScheduleDraft() {
-  const box = document.getElementById('groomScheduleDaysBox');
-  if (!box) return;
-  const dates = Object.keys(scheduleByDateDraft).sort();
-  if (!dates.length) {
-    box.innerHTML = '';
-    return;
-  }
-  box.innerHTML = dates.map(dt => {
-    const timesStr = (scheduleByDateDraft[dt] || []).join(', ');
-    return `<div class="sched-day-card">
-      <div class="sched-day-top">
-        <b>📅 ${esc(dt)}</b>
-        <button type="button" class="danger-btn small-btn" onclick="removeScheduleDay('${esc(dt)}')">Удалить день</button>
-      </div>
-      <div class="field" style="margin-bottom:0">
-        <label>Часы на ${esc(dt)} (через запятую)</label>
-        <input type="text" value="${esc(timesStr)}" placeholder="10:00, 12:00, 15:00" oninput="updateScheduleDayTimes('${esc(dt)}', this.value)">
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function addScheduleDay() {
-  const picker = document.getElementById('groomDayPicker');
-  const dt = picker?.value;
-  if (!dt) {
-    alert('Выберите дату');
-    return;
-  }
-  if (!scheduleByDateDraft[dt]) {
-    scheduleByDateDraft[dt] = ['10:00', '12:30', '15:00'];
-  }
-  renderScheduleDraft();
-  updatePreview();
-}
-
-function updateScheduleDayTimes(dt, val) {
-  scheduleByDateDraft[dt] = parseSlotList(val, []);
-  updatePreview();
-}
-
-function removeScheduleDay(dt) {
-  delete scheduleByDateDraft[dt];
-  renderScheduleDraft();
-  updatePreview();
-}
-
-document.getElementById('addGroomDayBtn')?.addEventListener('click', addScheduleDay);
-
-function renderGroomingSlots() {
-  if (!activeGroomingAd) return;
-  const dates = getGroomDates(activeGroomingAd);
-  if (!selectedGroomDate || !dates.includes(selectedGroomDate)) {
-    selectedGroomDate = dates[0] || '';
-  }
-  const times = getGroomTimesForDate(activeGroomingAd, selectedGroomDate);
-
-  const datesBox = document.getElementById('gDatesBox');
-  datesBox.innerHTML = dates.map(d => `
-    <button type="button" class="slot-chip ${d === selectedGroomDate ? 'active' : ''}" data-gdate="${esc(d)}">${esc(d)}</button>
-  `).join('');
-
-  datesBox.querySelectorAll('[data-gdate]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectedGroomDate = btn.dataset.gdate;
-      selectedGroomTime = '';
-      renderGroomingSlots();
-    });
-  });
-
-  const timesBox = document.getElementById('gTimesBox');
-  timesBox.innerHTML = times.map(t => {
-    const isTaken = takenGroomSlots.some(s => String(s.date) === String(selectedGroomDate) && String(s.time) === String(t));
-    const isActive = !isTaken && String(t) === String(selectedGroomTime);
-    return `<button type="button" class="slot-chip ${isActive ? 'active' : ''}" data-gtime="${esc(t)}" ${isTaken ? 'disabled' : ''}>${esc(t)}${isTaken ? ' · занято' : ''}</button>`;
-  }).join('');
-
-  timesBox.querySelectorAll('[data-gtime]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (btn.disabled) return;
-      selectedGroomTime = btn.dataset.gtime;
-      renderGroomingSlots();
-    });
-  });
-}
-
-async function openGroomingModal(ad) {
-  if (!ad) return;
-  activeGroomingAd = ad;
-  selectedGroomDate = '';
-  selectedGroomTime = '';
-  takenGroomSlots = [];
-
-  const groomerId = getSellerKey(ad);
-  const groomerName = getSellerDisplayName(ad);
-
-  document.getElementById('gTitle').textContent = `✂️ ${ad.title || 'Запись на груминг'}`;
-  document.getElementById('gMasterLine').textContent = `Мастер: ${groomerName}${ad.city ? ' · ' + ad.city : ''}`;
-
-  const u = tg?.initDataUnsafe?.user;
-  const cName = document.getElementById('gClientName');
-  const cPhone = document.getElementById('gClientPhone');
-  if (cName && !cName.value.trim()) {
-    cName.value = profileState?.name || (u ? [u.first_name, u.last_name].filter(Boolean).join(' ') : '');
-  }
-  if (cPhone && !cPhone.value.trim() && profileState?.phone) {
-    cPhone.value = profileState.phone;
-  }
-
-  renderGroomingSlots();
-  document.getElementById('groomingModal').classList.add('open');
-
-  try {
-    const q = new URLSearchParams({ groomer_id: groomerId });
-    if (ad.id) q.set('ad_id', String(ad.id));
-    const res = await fetch(`${API_URL}/api/grooming/booked-slots?${q.toString()}`);
-    if (res.ok) {
-      const data = await res.json();
-      takenGroomSlots = Array.isArray(data.taken_slots) ? data.taken_slots : [];
-      renderGroomingSlots();
-    }
-  } catch (_) {}
-}
-
-function closeGroomingModal(e) {
-  if (!e || e.target.id === 'groomingModal') {
-    document.getElementById('groomingModal').classList.remove('open');
-    activeGroomingAd = null;
-  }
-}
-
-document.getElementById('gSubmitBookingBtn')?.addEventListener('click', async () => {
-  if (!activeGroomingAd) return;
-  if (!selectedGroomDate) {
-    alert('Выберите дату записи');
-    return;
-  }
-  if (!selectedGroomTime) {
-    alert('Выберите свободное время');
-    return;
-  }
-  const petBreed = document.getElementById('gPetBreed')?.value.trim() || '';
-  const duration = document.getElementById('gDuration')?.value || '90 мин';
-  const petTasks = document.getElementById('gPetAndTasks').value.trim();
-  const clientName = document.getElementById('gClientName').value.trim();
-  const clientPhone = document.getElementById('gClientPhone').value.trim();
-
-  if (!petBreed) {
-    alert('Укажите породу или размер питомца');
-    return;
-  }
-  if (!petTasks) {
-    alert('Укажите кто питомец и что нужно сделать');
-    return;
-  }
-  if (!clientName || !clientPhone) {
-    alert('Укажите ваше имя и телефон');
-    return;
-  }
-
-  const combinedTasks = `Порода/размер: ${petBreed} · Длительность: ${duration} · ${petTasks}`;
-  const tgUser = tg?.initDataUnsafe?.user;
-  const groomOwnerTarget = getOwnerTelegramTarget(activeGroomingAd);
-  const payload = {
-    ad_id: activeGroomingAd.id ? String(activeGroomingAd.id) : null,
-    groomer_id: getSellerKey(activeGroomingAd),
-    groomer_name: getSellerDisplayName(activeGroomingAd),
-    groomer_phone: activeGroomingAd.phone || '',
-    groomer_username: groomOwnerTarget.owner_username,
-    owner_id: groomOwnerTarget.owner_id,
-    owner_username: groomOwnerTarget.owner_username,
-    service_title: activeGroomingAd.title || 'Груминг',
-    date: selectedGroomDate,
-    time: selectedGroomTime,
-    pet_breed: petBreed,
-    duration,
-    pet_and_tasks: combinedTasks,
-    client_id: tgUser?.id ? String(tgUser.id) : '',
-    client_username: tgUser?.username || '',
-    client_name: clientName,
-    client_phone: clientPhone
-  };
-
-  try {
-    const res = await fetch(`${API_URL}/api/grooming/bookings`, {
-      method: 'POST',
-      headers: authHeaders(),
-      body: JSON.stringify(payload)
-    });
-    const result = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      alert(`Ошибка записи (${res.status}): ${result.detail || 'проверьте сервер'}`);
-      return;
-    }
-
-    await sendTelegramNotification('grooming_created', {
-      booking_id: result.id || result.item?.id || '',
-      ...payload
-    });
-
-    document.getElementById('gPetBreed').value = '';
-    document.getElementById('gPetAndTasks').value = '';
-    closeGroomingModal();
-    await loadGroomingBookings();
-    alert('Заявка отправлена мастеру! Запись станет актуальной только после подтверждения мастером.');
-  } catch (err) {
-    alert(`Ошибка сети: ${err.message}`);
-  }
-});
-
-/* --- Cart & Orders --- */
+/* --- КОРЗИНА И ЗАКАЗЫ --- */
 function loadCart() {
   try {
     const raw = localStorage.getItem(CART_KEY);
@@ -1891,7 +1632,167 @@ document.getElementById('submitOrderBtn')?.addEventListener('click', async () =>
   }
 });
 
-/* --- Photos & Ad Modal --- */
+function renderGroomingSlots() {
+  if (!activeGroomingAd) return;
+  const dates = getGroomDates(activeGroomingAd);
+  if (!selectedGroomDate || !dates.includes(selectedGroomDate)) {
+    selectedGroomDate = dates[0] || '';
+  }
+  const times = getGroomTimesForDate(activeGroomingAd, selectedGroomDate);
+
+  const datesBox = document.getElementById('gDatesBox');
+  datesBox.innerHTML = dates.map(d => `
+    <button type="button" class="slot-chip ${d === selectedGroomDate ? 'active' : ''}" data-gdate="${esc(d)}">${esc(d)}</button>
+  `).join('');
+
+  datesBox.querySelectorAll('[data-gdate]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedGroomDate = btn.dataset.gdate;
+      selectedGroomTime = '';
+      renderGroomingSlots();
+    });
+  });
+
+  const timesBox = document.getElementById('gTimesBox');
+  timesBox.innerHTML = times.map(t => {
+    const isTaken = takenGroomSlots.some(s => String(s.date) === String(selectedGroomDate) && String(s.time) === String(t));
+    const isActive = !isTaken && String(t) === String(selectedGroomTime);
+    return `<button type="button" class="slot-chip ${isActive ? 'active' : ''}" data-gtime="${esc(t)}" ${isTaken ? 'disabled' : ''}>${esc(t)}${isTaken ? ' · занято' : ''}</button>`;
+  }).join('');
+
+  timesBox.querySelectorAll('[data-gtime]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      selectedGroomTime = btn.dataset.gtime;
+      renderGroomingSlots();
+    });
+  });
+}
+
+async function openGroomingModal(ad) {
+  if (!ad) return;
+  activeGroomingAd = ad;
+  selectedGroomDate = '';
+  selectedGroomTime = '';
+  takenGroomSlots = [];
+
+  const groomerId = getSellerKey(ad);
+  const groomerName = getSellerDisplayName(ad);
+
+  document.getElementById('gTitle').textContent = `✂️ ${ad.title || 'Запись на груминг'}`;
+  document.getElementById('gMasterLine').textContent = `Мастер: ${groomerName}${ad.city ? ' · ' + ad.city : ''}`;
+
+  const u = tg?.initDataUnsafe?.user;
+  const cName = document.getElementById('gClientName');
+  const cPhone = document.getElementById('gClientPhone');
+  if (cName && !cName.value.trim()) {
+    cName.value = profileState?.name || (u ? [u.first_name, u.last_name].filter(Boolean).join(' ') : '');
+  }
+  if (cPhone && !cPhone.value.trim() && profileState?.phone) {
+    cPhone.value = profileState.phone;
+  }
+
+  renderGroomingSlots();
+  document.getElementById('groomingModal').classList.add('open');
+
+  try {
+    const q = new URLSearchParams({ groomer_id: groomerId });
+    if (ad.id) q.set('ad_id', String(ad.id));
+    const res = await fetch(`${API_URL}/api/grooming/booked-slots?${q.toString()}`);
+    if (res.ok) {
+      const data = await res.json();
+      takenGroomSlots = Array.isArray(data.taken_slots) ? data.taken_slots : [];
+      renderGroomingSlots();
+    }
+  } catch (_) {}
+}
+
+function closeGroomingModal(e) {
+  if (!e || e.target.id === 'groomingModal') {
+    document.getElementById('groomingModal').classList.remove('open');
+    activeGroomingAd = null;
+  }
+}
+
+document.getElementById('gSubmitBookingBtn')?.addEventListener('click', async () => {
+  if (!activeGroomingAd) return;
+  if (!selectedGroomDate) {
+    alert('Выберите дату записи');
+    return;
+  }
+  if (!selectedGroomTime) {
+    alert('Выберите свободное время');
+    return;
+  }
+  const petBreed = document.getElementById('gPetBreed')?.value.trim() || '';
+  const duration = document.getElementById('gDuration')?.value || '90 мин';
+  const petTasks = document.getElementById('gPetAndTasks').value.trim();
+  const clientName = document.getElementById('gClientName').value.trim();
+  const clientPhone = document.getElementById('gClientPhone').value.trim();
+
+  if (!petBreed) {
+    alert('Укажите породу или размер питомца');
+    return;
+  }
+  if (!petTasks) {
+    alert('Укажите кто питомец и что нужно сделать');
+    return;
+  }
+  if (!clientName || !clientPhone) {
+    alert('Укажите ваше имя и телефон');
+    return;
+  }
+
+  const combinedTasks = `Порода/размер: ${petBreed} · Длительность: ${duration} · ${petTasks}`;
+  const tgUser = tg?.initDataUnsafe?.user;
+  const groomOwnerTarget = getOwnerTelegramTarget(activeGroomingAd);
+  const payload = {
+    ad_id: activeGroomingAd.id ? String(activeGroomingAd.id) : null,
+    groomer_id: getSellerKey(activeGroomingAd),
+    groomer_name: getSellerDisplayName(activeGroomingAd),
+    groomer_phone: activeGroomingAd.phone || '',
+    groomer_username: groomOwnerTarget.owner_username,
+    owner_id: groomOwnerTarget.owner_id,
+    owner_username: groomOwnerTarget.owner_username,
+    service_title: activeGroomingAd.title || 'Груминг',
+    date: selectedGroomDate,
+    time: selectedGroomTime,
+    pet_breed: petBreed,
+    duration,
+    pet_and_tasks: combinedTasks,
+    client_id: tgUser?.id ? String(tgUser.id) : '',
+    client_username: tgUser?.username || '',
+    client_name: clientName,
+    client_phone: clientPhone
+  };
+
+  try {
+    const res = await fetch(`${API_URL}/api/grooming/bookings`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`Ошибка записи (${res.status}): ${result.detail || 'проверьте сервер'}`);
+      return;
+    }
+
+    await sendTelegramNotification('grooming_created', {
+      booking_id: result.id || result.item?.id || '',
+      ...payload
+    });
+
+    document.getElementById('gPetBreed').value = '';
+    document.getElementById('gPetAndTasks').value = '';
+    closeGroomingModal();
+    await loadGroomingBookings();
+    alert('Заявка отправлена мастеру! Запись станет актуальной только после подтверждения мастером.');
+  } catch (err) {
+    alert(`Ошибка сети: ${err.message}`);
+  }
+});
+
 function compressImage(file, maxWidth = 800, quality = 0.7) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1963,7 +1864,8 @@ function openAdObj(ad, myIdx = -1) {
   const desc = ad.desc || ad.description || 'Описание не указано';
   const price = ad.price || 'Цена договорная';
   const stock = getAdStock(ad);
-  const soldOut = isShopAd(ad) && stock !== null && stock <= 0;
+  const shopFlag = isShopAd(ad);
+  const soldOut = shopFlag && stock !== null && stock <= 0;
   const city = ad.city || 'Город не указан';
   const contactText = [ad.contact, ad.phone].filter(Boolean).join(' · ') || 'Контакты не указаны';
   const photos = getAdPhotos(ad);
@@ -1975,7 +1877,7 @@ function openAdObj(ad, myIdx = -1) {
   document.getElementById('mTag').textContent = `${cat}${kind}`;
   const vetFlag = isVetAd(ad);
   document.getElementById('mBoostBadge').classList.toggle('hidden', !isBoostedAd(ad));
-  document.getElementById('mShopBadge').classList.toggle('hidden', !isShopAd(ad));
+  document.getElementById('mShopBadge').classList.toggle('hidden', !shopFlag);
   document.getElementById('mGroomBadge').classList.toggle('hidden', !isGroomingAd(ad));
   document.getElementById('mVetBadge').classList.toggle('hidden', !vetFlag);
   document.getElementById('mSoldoutBadge').classList.toggle('hidden', !soldOut);
@@ -1997,7 +1899,7 @@ function openAdObj(ad, myIdx = -1) {
 
   modalSelectedQty = 1;
   const shopActionBox = document.getElementById('mShopActionBox');
-  shopActionBox.classList.toggle('hidden', !isShopAd(ad));
+  shopActionBox.classList.toggle('hidden', !shopFlag);
   const addBtn = document.getElementById('mAddToCartBtn');
   const buyNowBtn = document.getElementById('mBuyNowBtn');
   const qtyValEl = document.getElementById('mQtyValue');
@@ -2099,7 +2001,6 @@ function closeAdModal(e) {
   }
 }
 
-/* --- Seller Modal & Reviews --- */
 function closeSellerModal(e) {
   if (!e || e.target.id === 'sellerModal') {
     document.getElementById('sellerModal').classList.remove('open');
@@ -2227,7 +2128,6 @@ document.getElementById('sSubmitReviewBtn')?.addEventListener('click', async () 
   }
 });
 
-/* --- Edit & Manage Ads --- */
 function openEditModal(idx) {
   const ad = userAds[idx];
   if (!ad) return;
@@ -2377,16 +2277,14 @@ async function deleteAd(idx) {
   alert('Объявление удалено.');
 }
 
-/* --- Feed & Filters --- */
 function render(items = allAds) {
   const sorted = [...items].sort((a, b) => {
     const bBoost = getBoostSortValue(b);
     const aBoost = getBoostSortValue(a);
     if (bBoost !== aBoost) return bBoost - aBoost;
-    const bTime = parseTimestampMs(b?.created_at);
-    const aTime = parseTimestampMs(a?.created_at);
-    if (bTime !== aTime) return bTime - aTime;
-    return String(b?.id || '').localeCompare(String(a?.id || ''));
+    const bId = Number(b?.id) || 0;
+    const aId = Number(a?.id) || 0;
+    return bId - aId;
   });
 
   document.getElementById('listings').innerHTML = sorted.map(x => {
@@ -2400,7 +2298,6 @@ function render(items = allAds) {
     const boostTag = isBoostedAd(x) ? '<span class="boost-badge">🚀 В ТОПЕ</span>' : '';
     const shopTag = isShopAd(x) ? '<span class="shop-badge">🏪 МАГАЗИН</span>' : '';
     const groomTag = isGroomingAd(x) ? '<span class="groom-badge">✂️ ГРУМИНГ</span>' : '';
-    const vetTag = isVetAd(x) ? '<span class="vet-badge">🩺 ВЕТЕРИНАР</span>' : '';
     const soldTag = soldOut ? '<span class="soldout-badge">❌ ЗАКОНЧИЛСЯ</span>' : '';
     const favActive = isSavedAd(x);
 
@@ -2408,7 +2305,7 @@ function render(items = allAds) {
       ${renderThumbHtml(x)}
       <div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-          <div><span class="tag">${esc(cat)}</span>${boostTag}${shopTag}${groomTag}${vetTag}${soldTag}</div>
+          <div><span class="tag">${esc(cat)}</span>${boostTag}${shopTag}${groomTag}${soldTag}</div>
           <button type="button" class="fav-btn ${favActive ? 'active' : ''}" onclick="toggleSaveAd(allAds[${realIdx}], event)">${favActive ? '❤️' : '🤍'}</button>
         </div>
         <h3>${esc(x.title)}</h3>
@@ -2457,13 +2354,12 @@ async function loadAds() {
   }
 }
 
-/* --- Grooming & Orders Loaders --- */
 async function loadGroomingBookings() {
   const box = document.getElementById('groomingBookingsList');
   const tgUser = tg?.initDataUnsafe?.user;
   const userId = tgUser?.id ? String(tgUser.id) : '';
   if (!userId) {
-    if (box) box.innerHTML = '<div class="muted">Откройте мини-приложение в Telegram, чтобы видеть записи на груминг.</div>';
+    box.innerHTML = '<div class="muted">Откройте мини-приложение в Telegram, чтобы видеть записи на груминг.</div>';
     return;
   }
   try {
@@ -2493,7 +2389,7 @@ function renderGroomingBookings() {
     const isConfirmed = b.status === 'confirmed';
     const isCompleted = b.status === 'completed';
     const isRejected = b.status === 'rejected' || b.status === 'cancelled';
-    const isMaster = myId && (String(b.groomer_id || '') === myId || String(b.owner_id || '') === myId);
+    const isMaster = myId && String(b.groomer_id || '') === myId;
 
     let statusBadge = '<span style="color:var(--yellow)">⏳ Ожидает подтверждения</span>';
     if (isConfirmed) statusBadge = '<span style="color:var(--green)">✅ Подтверждена</span>';
@@ -2568,7 +2464,6 @@ async function confirmGrooming(idx) {
       booking_id: b.id,
       status: 'confirmed',
       client_id: b.client_id || '',
-      client_username: b.client_username || '',
       groomer_name: b.groomer_name || 'Мастер',
       date: b.date || '',
       time: b.time || ''
@@ -2598,7 +2493,6 @@ async function completeGrooming(idx) {
       booking_id: b.id,
       status: 'completed',
       client_id: b.client_id || '',
-      client_username: b.client_username || '',
       groomer_name: b.groomer_name || 'Мастер',
       date: b.date || '',
       time: b.time || ''
@@ -2637,9 +2531,7 @@ async function cancelGrooming(idx) {
       status: 'cancelled',
       cancelled_by: cancelledBy,
       client_id: b.client_id || '',
-      client_username: b.client_username || '',
       groomer_id: b.groomer_id || '',
-      groomer_username: b.groomer_username || '',
       groomer_name: b.groomer_name || 'Мастер',
       date: b.date || '',
       time: b.time || ''
@@ -2656,7 +2548,7 @@ async function loadShopOrders() {
   const tgUser = tg?.initDataUnsafe?.user;
   const userId = tgUser?.id ? String(tgUser.id) : '';
   if (!userId) {
-    if (box) box.innerHTML = '<div class="muted">Откройте мини-приложение в Telegram, чтобы видеть заказы магазина.</div>';
+    box.innerHTML = '<div class="muted">Откройте мини-приложение в Telegram, чтобы видеть заказы магазина.</div>';
     return;
   }
   try {
@@ -2726,8 +2618,6 @@ function repeatOrder(idx) {
       ad_id: it.ad_id || (adMatch ? String(adMatch.id) : it.title),
       shop_id: it.shop_id || ord.shop_id || 'shop',
       shop_name: it.shop_name || ord.shop_name || 'Магазин',
-      owner_id: it.owner_id || ord.owner_id || '',
-      owner_username: it.owner_username || ord.owner_username || '',
       title: it.title || 'Товар',
       price: it.price || String(it.unit_price || 0),
       unit_price: Number(it.unit_price) || parsePriceNum(it.price),
@@ -2769,7 +2659,6 @@ async function confirmShopOrder(idx) {
       order_id: ord.id,
       status: 'confirmed',
       buyer_id: ord.buyer_id || '',
-      buyer_username: ord.buyer_username || '',
       shop_name: ord.shop_name || 'Магазин',
       total_sum: ord.total_sum ?? 0
     });
@@ -2798,7 +2687,6 @@ async function completeShopOrder(idx) {
       order_id: ord.id,
       status: 'completed',
       buyer_id: ord.buyer_id || '',
-      buyer_username: ord.buyer_username || '',
       shop_name: ord.shop_name || 'Магазин',
       total_sum: ord.total_sum ?? 0
     });
@@ -2828,7 +2716,6 @@ async function cancelShopOrder(idx) {
       order_id: ord.id,
       status: 'cancelled',
       buyer_id: ord.buyer_id || '',
-      buyer_username: ord.buyer_username || '',
       shop_name: ord.shop_name || 'Магазин',
       total_sum: ord.total_sum ?? 0
     });
@@ -2926,8 +2813,8 @@ function updatePreview() {
   const v = id => document.getElementById(id)?.value || '';
   const shopMark = document.getElementById('isShop')?.checked ? ' [🏪 МАГАЗИН]' : '';
   const groomChecked = Boolean(document.getElementById('isGrooming')?.checked);
-  const vetChecked = Boolean(document.getElementById('isVet')?.checked);
   const groomMark = groomChecked ? ' [✂️ ГРУМИНГ]' : '';
+  const vetChecked = Boolean(document.getElementById('isVet')?.checked);
   const vetMark = vetChecked ? ' [🩺 ВЕТЕРИНАР]' : '';
   const stockNum = Math.max(0, Math.floor(Number(v('stock')) || 0));
 
@@ -2935,17 +2822,17 @@ function updatePreview() {
   if (groomChecked) {
     const customDays = Object.keys(scheduleByDateDraft).filter(d => (scheduleByDateDraft[d] || []).length);
     if (customDays.length) {
-      slotsLine += '\nГруминг: ' + customDays.map(d => `${d} (${scheduleByDateDraft[d].join(', ')})`).join(' | ');
+      slotsLine += '\nРасписание груминга: ' + customDays.map(d => `${d} (${scheduleByDateDraft[d].join(', ')})`).join(' | ');
     } else {
-      slotsLine += `\nГруминг: ${getGroomDates({ grooming_dates: parseSlotList(v('groomDates'), []) }).join(', ')} | ${getGroomTimes({ grooming_times: parseSlotList(v('groomTimes'), []) }).join(', ')}`;
+      slotsLine += `\nСлоты груминга: ${getGroomDates({ grooming_dates: parseSlotList(v('groomDates'), []) }).join(', ')} | ${getGroomTimes({ grooming_times: parseSlotList(v('groomTimes'), []) }).join(', ')}`;
     }
   }
   if (vetChecked) {
     const customVetDays = Object.keys(vetScheduleByDateDraft).filter(d => (vetScheduleByDateDraft[d] || []).length);
     if (customVetDays.length) {
-      slotsLine += '\nВетеринар: ' + customVetDays.map(d => `${d} (${vetScheduleByDateDraft[d].join(', ')})`).join(' | ');
+      slotsLine += '\nРасписание ветврача: ' + customVetDays.map(d => `${d} (${vetScheduleByDateDraft[d].join(', ')})`).join(' | ');
     } else {
-      slotsLine += `\nВетеринар: ${getVetDates({ vet_dates: parseSlotList(v('vetDates'), []) }).join(', ')} | ${getVetTimes({ vet_times: parseSlotList(v('vetTimes'), []) }).join(', ')}`;
+      slotsLine += `\nСлоты ветврача: ${getVetDates({ vet_dates: parseSlotList(v('vetDates'), []) }).join(', ')} | ${getVetTimes({ vet_times: parseSlotList(v('vetTimes'), []) }).join(', ')}`;
     }
   }
 
@@ -2959,7 +2846,7 @@ function updatePreview() {
     `Связь: ${v('contact')} ${v('phone')}`;
 }
 
-/* --- Profile --- */
+const ZM_PROFILE_KEY = "zoomarket_profile_v1";
 const zmRoleCards = document.querySelectorAll(".zm-role-card");
 const zmChannelBtns = document.querySelectorAll(".zm-channel-btn");
 const zmProfileName = document.getElementById("zmProfileName");
@@ -2971,6 +2858,18 @@ const zmPrevTitle = document.getElementById("zmPrevTitle");
 const zmPrevMeta = document.getElementById("zmPrevMeta");
 const zmPrevContact = document.getElementById("zmPrevContact");
 const zmGoCreateBtn = document.getElementById("zmGoCreateBtn");
+
+let profileState = {
+  role: "ИЩУ / ПОКУПАЮ",
+  name: "",
+  phone: "",
+  channels: ["Telegram"],
+  notifications: {
+    new_ads: true,
+    orders_and_grooming: true,
+    stock_and_boost: true
+  }
+};
 
 function loadProfileState() {
   try {
@@ -3241,7 +3140,6 @@ document.getElementById('publish').onclick = async () => {
       stock: stockVal,
       is_shop: isShop,
       is_grooming: isGrooming,
-      is_vet: isVet,
       seller_name: sellerName
     });
 
@@ -3288,7 +3186,6 @@ function showMy() {
           ${boostInfo.isActive ? '<span class="boost-badge">🚀 В ТОПЕ</span>' : ''}
           ${isShopAd(a) ? '<span class="shop-badge">🏪 МАГАЗИН</span>' : ''}
           ${isGroomingAd(a) ? '<span class="groom-badge">✂️ ГРУМИНГ</span>' : ''}
-          ${isVetAd(a) ? '<span class="vet-badge">🩺 ВЕТЕРИНАР</span>' : ''}
           ${hiddenNow ? '<span class="hidden-badge">⏸ СКРЫТО</span>' : ''}
           <p class="muted">${esc(a.city || 'Город не указан')} · ${esc(a.price || '')}${esc(stockLine)} · ${esc(statusLabel)}${esc(boostStatusText)}</p>
           <div class="my-actions" onclick="event.stopPropagation()">
@@ -3310,7 +3207,7 @@ function applyDeepLinkStartParam() {
 
   if (!startParam) return;
 
-  if (startParam === 'my' || startParam.startsWith('order_') || startParam.startsWith('grooming_') || startParam.startsWith('vet_')) {
+  if (startParam === 'my' || startParam.startsWith('order_') || startParam.startsWith('grooming_')) {
     page('my');
     return;
   }
