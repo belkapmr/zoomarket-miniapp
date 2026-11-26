@@ -380,14 +380,17 @@ def get_ads(
     category: Optional[str] = None,
     q: Optional[str] = Query(default=None),
 ):
-    query = db.collection("ads").where("status", "==", "approved")
     docs = []
-    for doc in query.stream():
+    for doc in db.collection("ads").stream():
         item = doc.to_dict() | {"id": doc.id}
+        status_val = str(item.get("status") or "").strip().lower()
+        if item.get("is_hidden") or status_val in ("hidden", "rejected", "deleted", "archived"):
+            continue
+        if not item.get("status"):
+            item["status"] = "approved"
         if not item.get("is_shop") and infer_is_shop(item):
             item["is_shop"] = True
         docs.append(item)
-    docs = [x for x in docs if not x.get("is_hidden")]
 
     if category and category != "Все":
         docs = [x for x in docs if x.get("category") == category]
@@ -489,7 +492,19 @@ def update_ad(
         raise HTTPException(status_code=404, detail="Ad not found")
 
     data = snap.to_dict() or {}
-    if str(data.get("author_id", "")) != str(user_id):
+    uname = str(tg_user.get("username") or "").lstrip("@").strip().lower()
+    owner_ids = {
+        str(data.get("author_id") or "").strip(),
+        str(data.get("owner_id") or "").strip(),
+        str(data.get("seller_id") or "").strip(),
+        str(data.get("user_id") or "").strip(),
+    }
+    owner_unames = {
+        str(data.get("author_username") or "").lstrip("@").strip().lower(),
+        str(data.get("owner_username") or "").lstrip("@").strip().lower(),
+        str(data.get("seller_username") or "").lstrip("@").strip().lower(),
+    }
+    if str(user_id) not in owner_ids and (not uname or uname not in owner_unames):
         raise HTTPException(status_code=403, detail="Forbidden: not the author")
 
     updates: Dict[str, Any] = {}
@@ -612,7 +627,19 @@ def delete_ad(ad_id: str, x_telegram_init_data: str = Header(default="")):
         raise HTTPException(status_code=404, detail="Ad not found")
 
     data = snap.to_dict() or {}
-    if str(data.get("author_id", "")) != str(user_id):
+    uname = str(tg_user.get("username") or "").lstrip("@").strip().lower()
+    owner_ids = {
+        str(data.get("author_id") or "").strip(),
+        str(data.get("owner_id") or "").strip(),
+        str(data.get("seller_id") or "").strip(),
+        str(data.get("user_id") or "").strip(),
+    }
+    owner_unames = {
+        str(data.get("author_username") or "").lstrip("@").strip().lower(),
+        str(data.get("owner_username") or "").lstrip("@").strip().lower(),
+        str(data.get("seller_username") or "").lstrip("@").strip().lower(),
+    }
+    if str(user_id) not in owner_ids and (not uname or uname not in owner_unames):
         raise HTTPException(status_code=403, detail="Forbidden: not the author")
 
     doc_ref.delete()
@@ -622,9 +649,29 @@ def delete_ad(ad_id: str, x_telegram_init_data: str = Header(default="")):
 @app.get("/api/my-ads")
 def get_my_ads(x_telegram_init_data: str = Header(default="")):
     tg_user = verify_telegram_init_data(x_telegram_init_data, BOT_TOKEN)
-    author_id = tg_user.get("id")
-    docs = db.collection("ads").where("author_id", "==", author_id).stream()
-    return {"items": [doc.to_dict() | {"id": doc.id} for doc in docs]}
+    uid = str(tg_user.get("id") or "").strip()
+    uname = str(tg_user.get("username") or "").lstrip("@").strip().lower()
+    items = []
+    for doc in db.collection("ads").stream():
+        d = doc.to_dict() | {"id": doc.id}
+        candidate_ids = {
+            str(d.get("author_id") or "").strip(),
+            str(d.get("owner_id") or "").strip(),
+            str(d.get("seller_id") or "").strip(),
+            str(d.get("user_id") or "").strip(),
+        }
+        candidate_unames = {
+            str(d.get("author_username") or "").lstrip("@").strip().lower(),
+            str(d.get("owner_username") or "").lstrip("@").strip().lower(),
+            str(d.get("seller_username") or "").lstrip("@").strip().lower(),
+            str(d.get("username") or "").lstrip("@").strip().lower(),
+        }
+        if (uid and uid in candidate_ids) or (uname and uname in candidate_unames):
+            if not d.get("is_shop") and infer_is_shop(d):
+                d["is_shop"] = True
+            items.append(d)
+    items.sort(key=lambda x: str(x.get("created_at") or ""), reverse=True)
+    return {"items": items}
 
 
 # --- Sellers & Reviews ---
