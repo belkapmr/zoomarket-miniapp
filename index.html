@@ -2316,9 +2316,9 @@ function render(items = allAds) {
     const bBoost = getBoostSortValue(b);
     const aBoost = getBoostSortValue(a);
     if (bBoost !== aBoost) return bBoost - aBoost;
-    const bId = Number(b?.id) || 0;
-    const aId = Number(a?.id) || 0;
-    return bId - aId;
+    const bTs = parseTimestampMs(b?.created_at || b?.updated_at) || (Number(b?.id) || 0);
+    const aTs = parseTimestampMs(a?.created_at || a?.updated_at) || (Number(a?.id) || 0);
+    return bTs - aTs;
   });
 
   document.getElementById('listings').innerHTML = sorted.map(x => {
@@ -2762,8 +2762,25 @@ async function cancelShopOrder(idx) {
   }
 }
 
+function filterUserAdsFromAll() {
+  const tgUser = tg?.initDataUnsafe?.user;
+  const uid = tgUser?.id ? String(tgUser.id) : '';
+  const uname = (tgUser?.username || '').replace(/^@/, '').toLowerCase();
+  if (!uid && !uname) return [];
+  return allAds.filter(d => {
+    const ids = [d.author_id, d.owner_id, d.seller_id, d.user_id].map(v => String(v || '').trim());
+    const unames = [d.author_username, d.owner_username, d.seller_username, d.username].map(v => String(v || '').replace(/^@/, '').trim().toLowerCase());
+    return (uid && ids.includes(uid)) || (uname && unames.includes(uname));
+  });
+}
+
 async function loadMyAds() {
+  if (!allAds.length) {
+    await loadAds();
+  }
   if (!tg?.initData) {
+    const fallback = filterUserAdsFromAll();
+    if (fallback.length) userAds = fallback;
     showMy();
     await Promise.all([loadShopOrders(), loadGroomingBookings(), loadVetAppointments()]);
     return;
@@ -2774,9 +2791,12 @@ async function loadMyAds() {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    userAds = Array.isArray(data) ? data : (data.items || []);
+    const fetched = Array.isArray(data) ? data : (data.items || []);
+    userAds = fetched.length ? fetched : filterUserAdsFromAll();
   } catch (err) {
     console.error(err);
+    const fallback = filterUserAdsFromAll();
+    if (fallback.length) userAds = fallback;
   }
   showMy();
   await Promise.all([loadShopOrders(), loadGroomingBookings(), loadVetAppointments()]);
