@@ -355,13 +355,38 @@ def root():
     return {"status": "ok", "service": "ZooMarket API"}
 
 
+def infer_is_shop(data: Dict[str, Any]) -> bool:
+    if data.get("is_shop") is True or data.get("shop") is True or data.get("shop_mode") is True:
+        return True
+    if str(data.get("is_shop") or "").strip().lower() in ("true", "1", "yes", "да", "shop", "store", "магазин"):
+        return True
+    if str(data.get("shop_name") or "").strip() or str(data.get("shop_id") or "").strip():
+        return True
+    seller_blob = f"{data.get('seller_name', '')} {data.get('author_name', '')} {data.get('seller_type', '')}".lower()
+    if any(w in seller_blob for w in ("магазин", "зоомагазин", "shop", "store")):
+        return True
+    text_blob = f"{data.get('title', '')} {data.get('description', '')}".lower()
+    if any(w in text_blob for w in ("[🏪 магазин]", "это магазин", "зоомагазин")):
+        return True
+    if str(data.get("category") or "").strip().lower() == "товары" and (
+        "режим: предлагаю / продаю" in text_blob or str(data.get("kind") or "").strip().lower() == "зоотовар"
+    ):
+        return True
+    return False
+
+
 @app.get("/api/ads")
 def get_ads(
     category: Optional[str] = None,
     q: Optional[str] = Query(default=None),
 ):
     query = db.collection("ads").where("status", "==", "approved")
-    docs = [doc.to_dict() | {"id": doc.id} for doc in query.stream()]
+    docs = []
+    for doc in query.stream():
+        item = doc.to_dict() | {"id": doc.id}
+        if not item.get("is_shop") and infer_is_shop(item):
+            item["is_shop"] = True
+        docs.append(item)
     docs = [x for x in docs if not x.get("is_hidden")]
 
     if category and category != "Все":
@@ -396,6 +421,17 @@ def create_ad(ad: AdCreate, x_telegram_init_data: str = Header(default="")):
     owner_id = (ad.owner_id or ad.seller_id or tg_uid).strip() or tg_uid
     owner_username = (ad.owner_username or ad.seller_username or tg_uname).lstrip("@").strip()
     seller_name = (ad.seller_name or ad.shop_name or full_name or "Мастер / Продавец").strip()
+    resolved_is_shop = bool(ad.is_shop) or infer_is_shop({
+        "is_shop": ad.is_shop,
+        "shop_id": ad.shop_id,
+        "shop_name": ad.shop_name,
+        "seller_name": seller_name,
+        "author_name": full_name,
+        "title": title,
+        "description": ad.description,
+        "category": ad.category,
+        "kind": ad.kind,
+    })
 
     doc_data: Dict[str, Any] = {
         "kind": ad.kind,
@@ -409,9 +445,9 @@ def create_ad(ad: AdCreate, x_telegram_init_data: str = Header(default="")):
         "phone": ad.phone.strip(),
         "contact": ad.contact,
         "photos": (ad.photos or [])[:3],
-        "is_shop": bool(ad.is_shop),
-        "shop_id": (ad.shop_id or (tg_uid if ad.is_shop else "")),
-        "shop_name": (ad.shop_name or seller_name) if ad.is_shop else "",
+        "is_shop": resolved_is_shop,
+        "shop_id": (ad.shop_id or (tg_uid if resolved_is_shop else "")),
+        "shop_name": (ad.shop_name or seller_name) if resolved_is_shop else "",
         "is_grooming": bool(ad.is_grooming),
         "grooming_dates": ad.grooming_dates or [],
         "grooming_times": ad.grooming_times or [],
@@ -976,6 +1012,8 @@ def cancel_grooming_booking(booking_id: str, payload: GroomingCancelBody = Body(
 # --- Vet Appointments ---
 
 @app.get("/api/vet/booked-slots")
+@app.get("/api/vet/booked-slots/")
+@app.get("/vet/booked-slots")
 def get_vet_booked_slots(
     vet_id: Optional[str] = None,
     ad_id: Optional[str] = None,
@@ -993,8 +1031,11 @@ def get_vet_booked_slots(
 
 
 @app.post("/api/vet/appointments")
+@app.post("/api/vet/appointments/")
 @app.post("/vet/appointments")
+@app.post("/vet/appointments/")
 @app.post("/api/vet/book")
+@app.post("/api/vet/book/")
 def create_vet_appointment(
     appt: VetAppointmentCreate,
     x_telegram_init_data: str = Header(default=""),
@@ -1066,6 +1107,8 @@ def create_vet_appointment(
 
 
 @app.get("/api/vet/appointments")
+@app.get("/api/vet/appointments/")
+@app.get("/vet/appointments")
 def get_vet_appointments(
     user_id: Optional[str] = None,
     vet_id: Optional[str] = None,
