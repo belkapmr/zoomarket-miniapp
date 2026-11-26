@@ -591,11 +591,27 @@ function authHeaders() {
 }
 
 function isShopAd(ad) {
-  if (ad?.is_shop === true || ad?.shop === true || ad?.shop_mode === true) return true;
-  if (String(ad?.is_shop || '').toLowerCase() === 'true') return true;
-  if (ad?.shop_name && String(ad.shop_name).trim()) return true;
-  const text = `${ad?.title || ''} ${ad?.description || ''} ${ad?.desc || ''}`.toLowerCase();
-  return text.includes('[🏪 магазин]') || text.includes('это магазин');
+  if (!ad) return false;
+  if (ad.is_shop === true || ad.shop === true || ad.shop_mode === true) return true;
+  const rawShop = String(ad.is_shop ?? ad.shop ?? '').trim().toLowerCase();
+  if (['true', '1', 'yes', 'да', 'shop', 'store', 'магазин'].includes(rawShop)) return true;
+  if (ad.shop_name && String(ad.shop_name).trim()) return true;
+  if (ad.shop_id && String(ad.shop_id).trim()) return true;
+
+  const sellerType = String(ad.seller_type || ad.account_type || ad.role || '').toLowerCase();
+  if (sellerType.includes('магазин') || sellerType.includes('shop') || sellerType.includes('store')) return true;
+
+  const sellerName = String(ad.seller_name || ad.author_name || '').toLowerCase();
+  if (sellerName.includes('магазин') || sellerName.includes('зоомагазин') || sellerName.includes('shop') || sellerName.includes('store')) return true;
+
+  const text = `${ad.title || ''} ${ad.description || ''} ${ad.desc || ''}`.toLowerCase();
+  if (text.includes('[🏪 магазин]') || text.includes('это магазин') || text.includes('зоомагазин')) return true;
+
+  const cat = String(ad.category || ad.cat || '').toLowerCase();
+  if (cat === 'товары' && (text.includes('режим: предлагаю / продаю') || String(ad.kind || '').toLowerCase() === 'зоотовар')) {
+    return true;
+  }
+  return false;
 }
 
 function isGroomingAd(ad) {
@@ -637,7 +653,12 @@ function getSellerKey(ad) {
 }
 
 function getSellerDisplayName(ad) {
-  return ad?.shop_name || ad?.seller_name || ad?.author_name || ad?.username || 'Мастер / Продавец';
+  const candidates = [ad?.shop_name, ad?.seller_name, ad?.author_name, ad?.username];
+  for (const c of candidates) {
+    const clean = String(c || '').replace(/^[.\s]+|[.\s]+$/g, '').trim();
+    if (clean && clean !== '.') return clean;
+  }
+  return 'Мастер / Продавец';
 }
 
 function getOwnerTelegramTarget(ad) {
@@ -1260,14 +1281,27 @@ document.getElementById('vSubmitBookingBtn')?.addEventListener('click', async ()
   };
 
   try {
-    const res = await fetch(`${API_URL}/api/vet/appointments`, {
-      method: 'POST',
-      headers: authHeaders(),
-      body: JSON.stringify(payload)
-    });
-    const result = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      alert(`Ошибка записи (${res.status}): ${result.detail || 'проверьте сервер'}`);
+    const endpoints = [
+      `${API_URL}/api/vet/appointments`,
+      `${API_URL}/vet/appointments`,
+      `${API_URL}/api/vet/book`
+    ];
+    let res = null;
+    let result = {};
+    for (const url of endpoints) {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload)
+      });
+      result = await res.json().catch(() => ({}));
+      if (res.status !== 404) break;
+    }
+    if (!res || !res.ok) {
+      const hint = res?.status === 404
+        ? 'Роут записи к ветеринару не найден на сервере (404). Перезапустите обновлённый main.py на бэкенде.'
+        : (result.detail || 'проверьте сервер');
+      alert(`Ошибка записи (${res?.status || 'ERR'}): ${hint}`);
       return;
     }
 
@@ -2298,6 +2332,7 @@ function render(items = allAds) {
     const boostTag = isBoostedAd(x) ? '<span class="boost-badge">🚀 В ТОПЕ</span>' : '';
     const shopTag = isShopAd(x) ? '<span class="shop-badge">🏪 МАГАЗИН</span>' : '';
     const groomTag = isGroomingAd(x) ? '<span class="groom-badge">✂️ ГРУМИНГ</span>' : '';
+    const vetTag = isVetAd(x) ? '<span class="vet-badge">🩺 ВЕТЕРИНАР</span>' : '';
     const soldTag = soldOut ? '<span class="soldout-badge">❌ ЗАКОНЧИЛСЯ</span>' : '';
     const favActive = isSavedAd(x);
 
@@ -2305,7 +2340,7 @@ function render(items = allAds) {
       ${renderThumbHtml(x)}
       <div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-          <div><span class="tag">${esc(cat)}</span>${boostTag}${shopTag}${groomTag}${soldTag}</div>
+          <div><span class="tag">${esc(cat)}</span>${boostTag}${shopTag}${groomTag}${vetTag}${soldTag}</div>
           <button type="button" class="fav-btn ${favActive ? 'active' : ''}" onclick="toggleSaveAd(allAds[${realIdx}], event)">${favActive ? '❤️' : '🤍'}</button>
         </div>
         <h3>${esc(x.title)}</h3>
@@ -3025,9 +3060,15 @@ document.getElementById('publish').onclick = async () => {
   const stockVal = Math.max(0, Math.floor(Number(document.getElementById('stock')?.value) || 0));
   const phoneVal = document.getElementById('phone').value.trim() || profileState.phone;
   const channelsStr = profileState.channels.join(', ');
-  const isShop = Boolean(document.getElementById('isShop')?.checked);
   const isGrooming = Boolean(document.getElementById('isGrooming')?.checked);
   const isVet = Boolean(document.getElementById('isVet')?.checked);
+  const rawShopChecked = Boolean(document.getElementById('isShop')?.checked);
+  const sellerHintText = `${profileState.name || ''} ${title} ${document.getElementById('description')?.value || ''}`.toLowerCase();
+  const isShop = rawShopChecked || (!isGrooming && !isVet && (
+    sellerHintText.includes('магазин') ||
+    sellerHintText.includes('зоомагазин') ||
+    (profileState.role === 'ПРЕДЛАГАЮ / ПРОДАЮ' && document.getElementById('category')?.value === 'Товары')
+  ));
 
   let groomingDates = [];
   let groomingTimes = [];
